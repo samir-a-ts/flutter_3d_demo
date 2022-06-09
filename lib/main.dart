@@ -136,8 +136,8 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       body: Center(
         child: SizedBox(
-          width: 300,
-          height: 200,
+          width: 150,
+          height: 150,
           child: ModelWidget(
             mesh: mesh,
             controller: _controller,

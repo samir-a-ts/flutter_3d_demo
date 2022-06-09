@@ -33,8 +33,6 @@ class _ModelWidgetState extends State<ModelWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Container();
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
@@ -101,25 +99,25 @@ class ModelRenderObject extends RenderBox {
   set mesh(Mesh mesh) {
     _mesh = mesh;
 
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   set angleX(double angleX) {
     _angleX = angleX;
 
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   set angleZ(double angleZ) {
     _angleZ = angleZ;
 
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   set offset(double offset) {
     _offset = offset;
 
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   @override
@@ -157,7 +155,7 @@ class ModelRenderObject extends RenderBox {
   void _drawMesh(PaintingContext context, Mesh mesh) {
     final projectedMesh = _projectMesh(
       mesh: mesh,
-      screenSize: size,
+      widgetSize: size,
       angleX: _angleX,
       angleZ: _angleZ,
       offset: _offset,
@@ -170,7 +168,13 @@ class ModelRenderObject extends RenderBox {
 
     final canvas = context.canvas;
 
-    canvas.translate(size.width, size.height);
+    final global = localToGlobal(Offset.zero);
+
+    final dx = global.dx + (size.width / 2);
+
+    final dy = global.dy + (size.height / 2);
+
+    canvas.translate(dx, dy);
 
     for (final polygon in projectedMesh) {
       for (int i = 0; i < polygon.length - 1; i++) {
@@ -196,14 +200,12 @@ class ModelRenderObject extends RenderBox {
 
 Mesh _projectMesh({
   required Mesh mesh,
-  required Size screenSize,
+  required Size widgetSize,
   double offset = 3.0,
-  double focusFar = 1000.0,
-  double focusNear = 0.1,
   double angleX = 0,
   double angleZ = 0,
 }) {
-  assert(focusFar > focusNear);
+  const focusFar = 1000.0, focusNear = 0.1;
 
   final Matrix4 projectionMatrix = Matrix4.zero();
 
@@ -212,7 +214,7 @@ Mesh _projectMesh({
   final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
 
   projectionMatrix.setEntry(
-      0, 0, (screenSize.height / screenSize.width) * _fFovRad);
+      0, 0, (widgetSize.height / widgetSize.width) * _fFovRad);
   projectionMatrix.setEntry(1, 1, _fFovRad);
   projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
   projectionMatrix.setEntry(
@@ -251,8 +253,8 @@ Mesh _projectMesh({
 
   final Matrix4 sizingMatrix = Matrix4.zero();
 
-  sizingMatrix.setEntry(0, 0, (screenSize.width));
-  sizingMatrix.setEntry(1, 1, (screenSize.height));
+  sizingMatrix.setEntry(0, 0, (widgetSize.width));
+  sizingMatrix.setEntry(1, 1, (widgetSize.height));
   sizingMatrix.setEntry(2, 2, 1);
   sizingMatrix.setEntry(3, 3, 1);
 
