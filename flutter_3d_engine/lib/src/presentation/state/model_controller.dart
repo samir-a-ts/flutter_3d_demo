@@ -1,18 +1,22 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_3d_engine/flutter_3d_engine.dart';
 
 class ModelController extends ChangeNotifier {
   late double _angleX;
   late double _angleZ;
   late double _offset;
+  late Vector3D _vCamera;
 
   ModelController({
     double angleX = 0,
     double angleZ = 0,
     double offset = 3.0,
+    Vector3D vCamera = const Vector3D(0, 0, 0),
   }) {
     _angleX = angleX;
     _angleZ = angleZ;
     _offset = offset;
+    _vCamera = vCamera;
   }
 
   double get angleX => _angleX;
@@ -21,27 +25,37 @@ class ModelController extends ChangeNotifier {
 
   double get offset => _offset;
 
-  set angleX(double value) {
-    if (value != _angleX) {
-      _angleX = value;
+  Vector3D get vCamera => _vCamera;
 
-      notifyListeners();
-    }
+  set angleX(double value) {
+    if (value == _angleX) return;
+
+    _angleX = value;
+
+    notifyListeners();
   }
 
   set angleZ(double value) {
-    if (value != _angleZ) {
-      _angleZ = value;
+    if (value == _angleZ) return;
 
-      notifyListeners();
-    }
+    _angleZ = value;
+
+    notifyListeners();
   }
 
   set offset(double value) {
-    if (value != _offset) {
-      _offset = value;
+    if (value == _offset) return;
 
-      notifyListeners();
-    }
+    _offset = value;
+
+    notifyListeners();
+  }
+
+  set vCamera(Vector3D value) {
+    if (value == _vCamera) return;
+
+    _vCamera = value;
+
+    notifyListeners();
   }
 }

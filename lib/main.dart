@@ -34,7 +34,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  final mesh = Mesh(
+  final mesh = const Mesh(
     [
       /// South
       Polygon([

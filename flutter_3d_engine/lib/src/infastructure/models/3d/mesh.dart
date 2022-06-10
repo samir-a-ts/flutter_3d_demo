@@ -6,11 +6,7 @@ import 'package:flutter_3d_engine/src/infastructure/models/3d/polygon.dart';
 class Mesh extends Iterable<Polygon> {
   final List<Polygon> sides;
 
-  Mesh._(this.sides);
-
-  factory Mesh(List<Polygon> sides) {
-    return Mesh._(sides);
-  }
+  const Mesh(this.sides);
 
   @override
   Iterator<Polygon> get iterator => sides.iterator;

@@ -41,6 +41,7 @@ class _ModelWidgetState extends State<ModelWidget> {
           angleX: _controller.angleX,
           angleZ: _controller.angleZ,
           offset: _controller.offset,
+          vCamera: _controller.vCamera,
         );
       },
     );
@@ -53,8 +54,10 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
   final double angleX;
   final double angleZ;
   final double offset;
+  final Vector3D vCamera;
 
   const ModelRenderObjectWidget({
+    required this.vCamera,
     required this.angleX,
     required this.angleZ,
     required this.offset,
@@ -69,6 +72,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
       angleX,
       angleZ,
       offset,
+      vCamera,
     );
   }
 
@@ -88,12 +92,14 @@ class ModelRenderObject extends RenderBox {
   double _angleX;
   double _angleZ;
   double _offset;
+  Vector3D _vCamera;
 
   ModelRenderObject(
     this._mesh,
     this._angleX,
     this._angleZ,
     this._offset,
+    this._vCamera,
   );
 
   set mesh(Mesh mesh) {
@@ -164,7 +170,7 @@ class ModelRenderObject extends RenderBox {
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.fill;
 
     final canvas = context.canvas;
 
@@ -177,128 +183,128 @@ class ModelRenderObject extends RenderBox {
     canvas.translate(dx, dy);
 
     for (final polygon in projectedMesh) {
-      for (int i = 0; i < polygon.length - 1; i++) {
-        Offset current = polygon[i].toOffset();
-
-        Offset next = polygon[i + 1].toOffset();
-
-        canvas.drawLine(
-          current,
-          next,
-          paint,
-        );
-      }
-
-      canvas.drawLine(
-        polygon.last.toOffset(),
-        polygon.first.toOffset(),
+      canvas.drawPath(
+        polygon.toPath(),
         paint,
       );
     }
   }
-}
 
-Mesh _projectMesh({
-  required Mesh mesh,
-  required Size widgetSize,
-  double offset = 3.0,
-  double angleX = 0,
-  double angleZ = 0,
-}) {
-  const focusFar = 1000.0, focusNear = 0.1;
+  Mesh _projectMesh({
+    required Mesh mesh,
+    required Size widgetSize,
+    double offset = 3.0,
+    double angleX = 0,
+    double angleZ = 0,
+  }) {
+    const focusFar = 1000.0, focusNear = 0.1;
 
-  final Matrix4 projectionMatrix = Matrix4.zero();
+    final Matrix4 projectionMatrix = Matrix4.zero();
 
-  const _fFov = 90.0;
+    const _fFov = 90.0;
 
-  final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
+    final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
 
-  projectionMatrix.setEntry(
-      0, 0, (widgetSize.height / widgetSize.width) * _fFovRad);
-  projectionMatrix.setEntry(1, 1, _fFovRad);
-  projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
-  projectionMatrix.setEntry(
-      3, 2, (-focusFar * focusNear) / (focusFar - focusNear));
-  projectionMatrix.setEntry(2, 3, 1.0);
-  projectionMatrix.setEntry(3, 3, 0.0);
+    projectionMatrix.setEntry(
+        0, 0, (widgetSize.height / widgetSize.width) * _fFovRad);
+    projectionMatrix.setEntry(1, 1, _fFovRad);
+    projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
+    projectionMatrix.setEntry(
+        3, 2, (-focusFar * focusNear) / (focusFar - focusNear));
+    projectionMatrix.setEntry(2, 3, 1.0);
+    projectionMatrix.setEntry(3, 3, 0.0);
 
-  final projectedPolygons = <Polygon>[];
+    final projectedPolygons = <Polygon>[];
 
-  final Matrix4 rotationMatrixZ = Matrix4.zero();
+    final Matrix4 rotationMatrixZ = Matrix4.zero();
 
-  final cosAngle = cos(angleZ);
-  final sinAngle = sin(angleZ);
+    final cosAngle = cos(angleZ);
+    final sinAngle = sin(angleZ);
 
-  rotationMatrixZ.setEntry(0, 0, cosAngle);
-  rotationMatrixZ.setEntry(0, 1, sinAngle);
-  rotationMatrixZ.setEntry(1, 0, -sinAngle);
-  rotationMatrixZ.setEntry(1, 1, cosAngle);
-  rotationMatrixZ.setEntry(2, 2, 1);
-  rotationMatrixZ.setEntry(3, 3, 1);
+    rotationMatrixZ.setEntry(0, 0, cosAngle);
+    rotationMatrixZ.setEntry(0, 1, sinAngle);
+    rotationMatrixZ.setEntry(1, 0, -sinAngle);
+    rotationMatrixZ.setEntry(1, 1, cosAngle);
+    rotationMatrixZ.setEntry(2, 2, 1);
+    rotationMatrixZ.setEntry(3, 3, 1);
 
-  final Matrix4 rotationMatrixX = Matrix4.zero();
+    final Matrix4 rotationMatrixX = Matrix4.zero();
 
-  final halfCosAngle = cos(angleX / 2);
-  final halfSinAngle = sin(angleX / 2);
+    final halfCosAngle = cos(angleX / 2);
+    final halfSinAngle = sin(angleX / 2);
 
-  rotationMatrixX.setEntry(0, 0, 1);
-  rotationMatrixX.setEntry(1, 1, halfCosAngle);
-  rotationMatrixX.setEntry(1, 2, halfSinAngle);
-  rotationMatrixX.setEntry(2, 1, -halfSinAngle);
-  rotationMatrixX.setEntry(2, 2, halfCosAngle);
-  rotationMatrixX.setEntry(3, 3, 1);
+    rotationMatrixX.setEntry(0, 0, 1);
+    rotationMatrixX.setEntry(1, 1, halfCosAngle);
+    rotationMatrixX.setEntry(1, 2, halfSinAngle);
+    rotationMatrixX.setEntry(2, 1, -halfSinAngle);
+    rotationMatrixX.setEntry(2, 2, halfCosAngle);
+    rotationMatrixX.setEntry(3, 3, 1);
 
-  /// Changes size of object by
-  /// screen size
+    /// Changes size of object by
+    /// screen size
 
-  final Matrix4 sizingMatrix = Matrix4.zero();
+    final Matrix4 sizingMatrix = Matrix4.zero();
 
-  sizingMatrix.setEntry(0, 0, (widgetSize.width));
-  sizingMatrix.setEntry(1, 1, (widgetSize.height));
-  sizingMatrix.setEntry(2, 2, 1);
-  sizingMatrix.setEntry(3, 3, 1);
+    sizingMatrix.setEntry(0, 0, (widgetSize.width));
+    sizingMatrix.setEntry(1, 1, (widgetSize.height));
+    sizingMatrix.setEntry(2, 2, 1);
+    sizingMatrix.setEntry(3, 3, 1);
 
-  for (final polygon in mesh) {
-    final rotatedPoints = <Vector3D>[];
+    for (final polygon in mesh) {
+      final rotatedPoints = <Vector3D>[];
 
-    for (final point in polygon) {
-      final p = Vector3D.copy(point);
+      for (final point in polygon) {
+        final p = Vector3D.copy(point);
 
-      /// Rotating polygons
+        /// Rotating polygons
 
-      /// By Z axis
-      final rotatedZVector = rotationMatrixZ.multiplyByVector(p);
+        /// By Z axis
+        Vector3D rotatedZVector = rotationMatrixZ.multiplyByVector(p);
 
-      /// By X axis
-      final rotatedXVector = rotationMatrixX.multiplyByVector(rotatedZVector);
+        /// By X axis
+        Vector3D rotatedXVector =
+            rotationMatrixX.multiplyByVector(rotatedZVector);
 
-      /// Creating some perspective
+        /// Creating some perspective
 
-      rotatedXVector.z += offset;
+        rotatedXVector = Vector3D(
+          rotatedXVector.x,
+          rotatedXVector.y,
+          rotatedXVector.z + offset,
+        );
 
-      rotatedPoints.add(rotatedXVector);
-    }
-
-    final rotatedPolygon = Polygon(rotatedPoints);
-
-    if (rotatedPolygon.calculateNormal().z < 0) {
-      final projectedPoints = <Vector3D>[];
-
-      for (final rotatedPoint in rotatedPolygon) {
-        final projectedVector = projectionMatrix.multiplyByVector(rotatedPoint);
-
-        final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
-
-        projectedPoints.add(sizedPoint);
+        rotatedPoints.add(rotatedXVector);
       }
 
-      projectedPolygons.add(
-        Polygon(projectedPoints),
-      );
-    }
-  }
+      final rotatedPolygon = Polygon(rotatedPoints);
 
-  return Mesh(projectedPolygons);
+      final normal = rotatedPolygon.calculateNormal();
+
+      final point = rotatedPolygon.first;
+
+      if (normal.x * (point.x - _vCamera.x) +
+              normal.y * (point.y - _vCamera.y) +
+              normal.z * (point.z - _vCamera.z) <
+          0) {
+        final projectedPoints = <Vector3D>[];
+
+        for (final rotatedPoint in rotatedPolygon) {
+          final projectedVector =
+              projectionMatrix.multiplyByVector(rotatedPoint);
+
+          final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
+
+          projectedPoints.add(sizedPoint);
+        }
+
+        projectedPolygons.add(
+          Polygon(projectedPoints),
+        );
+      }
+    }
+
+    return Mesh(projectedPolygons);
+  }
 }
 
 /// HasInfiniteHeight and HasInfiniteWidth properties
