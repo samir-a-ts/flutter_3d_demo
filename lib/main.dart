@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_object/flutter_object.dart';
 
@@ -31,21 +33,19 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   final _controller = ObjectViewController();
 
+  late AnimationController animationC;
+
   @override
   void initState() {
-    final animationC = AnimationController(
+    animationC = AnimationController(
       vsync: this,
       lowerBound: 0,
       upperBound: 10,
-      duration: const Duration(seconds: 10),
     );
 
     animationC.addListener(() {
       _controller.angleX = animationC.value;
-      _controller.angleZ = animationC.value;
     });
-
-    animationC.repeat();
 
     super.initState();
   }
@@ -53,15 +53,47 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: 400,
-          height: 400,
-          child: ObjectWidget(
-            source: ObjectSource.fromAssets("assets/cube.obj"),
-            controller: _controller,
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          Center(
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: ObjectWidget(
+                source: ObjectSource.fromAssets("assets/plane.obj"),
+                controller: _controller
+                  ..offset = 12
+                  ..angleZ = pi / 3,
+              ),
+            ),
           ),
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: 20,
+              ),
+              child: SizedBox(
+                width: 400,
+                height: 20,
+                child: AnimatedBuilder(
+                  animation: animationC,
+                  builder: (context, snapshot) {
+                    return Slider(
+                      value: _controller.angleX,
+                      min: 0.0,
+                      max: 10.0,
+                      onChanged: (_) {
+                        animationC.value = _;
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -56,11 +56,11 @@ class ObjReader {
 
 extension _StringExt on String {
   String getFirstSplittedValue(String pattern) {
-    final l = pattern.length;
+    final pLength = pattern.length;
 
     for (int i = 0; i < length; i++) {
-      if (substring(i, i + l + 1) == pattern) {
-        return substring(0, i + 1);
+      if (substring(i, i + pLength) == pattern) {
+        return substring(0, i);
       }
     }
 

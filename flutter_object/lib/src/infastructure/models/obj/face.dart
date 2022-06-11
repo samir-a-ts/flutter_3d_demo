@@ -15,7 +15,9 @@ class Face {
   /// There have to be at least 3
   /// vertexes for this polygon.
   factory Face.fromString(String data) {
-    final List<String> rawData = data.split(' ');
+    final List<String> rawData = data.trim().split(' ');
+
+    rawData.removeWhere((element) => element.isEmpty);
 
     /// "f" letter may be ignored.
     rawData.removeAt(0);
@@ -24,9 +26,9 @@ class Face {
 
     final List<FaceVertex> resultVertexes = [];
 
-    for (final data in rawData) {
+    for (final side in rawData) {
       resultVertexes.add(
-        FaceVertex.fromString(data),
+        FaceVertex.fromString(side),
       );
     }
 
@@ -69,14 +71,10 @@ class FaceVertex {
 
     final List<int?> parsedNumbers = [null, null, null];
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < rawNumbers.length; i++) {
       final value = rawNumbers[i];
 
-      if (value.isEmpty) {
-        parsedNumbers[i] = null;
-      } else {
-        parsedNumbers[i] = int.parse(value) - 1;
-      }
+      parsedNumbers[i] = value.isNotEmpty ? int.parse(value) - 1 : -1;
     }
 
     return FaceVertex._(

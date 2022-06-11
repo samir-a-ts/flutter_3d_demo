@@ -241,8 +241,8 @@ class RenderMesh extends RenderBox {
 
     final Matrix4 sizingMatrix = Matrix4.zero();
 
-    sizingMatrix.setEntry(0, 0, (size.width));
-    sizingMatrix.setEntry(1, 1, (size.height));
+    sizingMatrix.setEntry(0, 0, (size.width * .5));
+    sizingMatrix.setEntry(1, 1, (size.height * .5));
     sizingMatrix.setEntry(2, 2, 1);
     sizingMatrix.setEntry(3, 3, 1);
 

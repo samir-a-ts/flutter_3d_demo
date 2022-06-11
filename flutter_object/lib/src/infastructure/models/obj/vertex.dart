@@ -41,10 +41,18 @@ class Vertex {
   factory Vertex.fromObjRecord(String record) {
     final splitted = record.split(" ");
 
+    splitted.removeWhere((element) => element.isEmpty);
+
     final values = <double>[];
 
     for (int i = 1; i < splitted.length; i++) {
-      values.add(double.parse(splitted[i]));
+      final value = splitted[i];
+
+      values.add(
+        double.parse(
+          value.isEmpty ? "-1" : value,
+        ),
+      );
     }
 
     return Vertex.fromList(values);
