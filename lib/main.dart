@@ -11,19 +11,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '3D Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -31,82 +29,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  final mesh = const Mesh(
-    [
-      /// South
-      Polygon([
-        Vector3D(0, 0, 0),
-        Vector3D(0, 1, 0),
-        Vector3D(1, 1, 0),
-      ]),
-      Polygon([
-        Vector3D(0, 0, 0),
-        Vector3D(1, 1, 0),
-        Vector3D(1, 0, 0),
-      ]),
-
-      /// East
-      Polygon([
-        Vector3D(1, 0, 0),
-        Vector3D(1, 1, 0),
-        Vector3D(1, 1, 1),
-      ]),
-      Polygon([
-        Vector3D(1, 0, 0),
-        Vector3D(1, 1, 1),
-        Vector3D(1, 0, 1),
-      ]),
-
-      /// North
-      Polygon([
-        Vector3D(1, 0, 1),
-        Vector3D(1, 1, 1),
-        Vector3D(0, 1, 1),
-      ]),
-      Polygon([
-        Vector3D(1, 0, 1),
-        Vector3D(0, 1, 1),
-        Vector3D(0, 0, 1),
-      ]),
-
-      /// West
-      Polygon([
-        Vector3D(0, 0, 1),
-        Vector3D(0, 1, 1),
-        Vector3D(0, 1, 0),
-      ]),
-      Polygon([
-        Vector3D(0, 0, 1),
-        Vector3D(0, 1, 0),
-        Vector3D(0, 0, 0),
-      ]),
-
-      /// Top
-      Polygon([
-        Vector3D(0, 1, 0),
-        Vector3D(0, 1, 1),
-        Vector3D(1, 1, 1),
-      ]),
-      Polygon([
-        Vector3D(0, 1, 0),
-        Vector3D(1, 1, 1),
-        Vector3D(1, 1, 0),
-      ]),
-
-      /// Bottom
-      Polygon([
-        Vector3D(1, 0, 1),
-        Vector3D(0, 0, 1),
-        Vector3D(0, 0, 0),
-      ]),
-      Polygon([
-        Vector3D(1, 0, 1),
-        Vector3D(0, 0, 0),
-        Vector3D(1, 0, 0),
-      ]),
-    ],
-  );
-
   final _controller = ObjectViewController();
 
   @override
@@ -117,8 +39,6 @@ class _MyHomePageState extends State<MyHomePage>
       upperBound: 10,
       duration: const Duration(seconds: 10),
     );
-
-    _controller.mesh = mesh;
 
     animationC.addListener(() {
       _controller.angleX = animationC.value;
@@ -137,7 +57,8 @@ class _MyHomePageState extends State<MyHomePage>
         child: SizedBox(
           width: 400,
           height: 400,
-          child: ModelWidget(
+          child: ObjectWidget(
+            source: AssetObjectSource("assets/cube.obj"),
             controller: _controller,
           ),
         ),

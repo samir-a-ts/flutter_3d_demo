@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_object/src/core/math/matrix.dart';
@@ -6,21 +7,27 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_object/src/infastructure/models/3d/mesh.dart';
 import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
 import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
-import 'package:flutter_object/src/presentation/state/model_controller.dart';
+import 'package:flutter_object/src/infastructure/models/source/object_source.dart';
+import 'package:flutter_object/src/presentation/core/empty.dart';
+import 'package:flutter_object/src/presentation/state/object_view_controller.dart';
 
-class ModelWidget extends StatefulWidget {
+class ObjectWidget extends StatefulWidget {
+  final ObjectSource? source;
   final ObjectViewController? controller;
+  final Widget? loadingPlaceholder;
 
-  const ModelWidget({
+  const ObjectWidget({
     Key? key,
+    this.source = const EmptyObjectSource(),
     this.controller,
+    this.loadingPlaceholder,
   }) : super(key: key);
 
   @override
-  State<ModelWidget> createState() => _ModelWidgetState();
+  State<ObjectWidget> createState() => _ObjectWidgetState();
 }
 
-class _ModelWidgetState extends State<ModelWidget> {
+class _ObjectWidgetState extends State<ObjectWidget> {
   late ObjectViewController _controller;
 
   @override
@@ -32,22 +39,37 @@ class _ModelWidgetState extends State<ModelWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return MeshRenderObjectWidget(
-          angleX: _controller.angleX,
-          angleZ: _controller.angleZ,
-          offset: _controller.offset,
-          vCamera: _controller.vCamera,
-          lightDirection: _controller.lightDirection,
-        );
+    return FutureBuilder<Mesh?>(
+      future: _loadObjectFromSource(widget.source),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return MeshRenderObjectWidget(
+                mesh: snapshot.data,
+                angleX: _controller.angleX,
+                angleZ: _controller.angleZ,
+                offset: _controller.offset,
+                vCamera: _controller.vCamera,
+                lightDirection: _controller.lightDirection,
+              );
+            },
+          );
+        }
+
+        return widget.loadingPlaceholder ?? const Empty();
       },
     );
   }
+
+  Future<Mesh?> _loadObjectFromSource(ObjectSource? source) async {
+    final mesh = await source?.data;
+
+    return mesh;
+  }
 }
 
-/// Cube render demo
 class MeshRenderObjectWidget extends LeafRenderObjectWidget {
   final Mesh? mesh;
   final double angleX;
@@ -68,7 +90,7 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return MeshRenderObject(
+    return RenderMesh(
       mesh,
       angleX,
       angleZ,
@@ -80,7 +102,7 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant MeshRenderObject renderObject) {
+      BuildContext context, covariant RenderMesh renderObject) {
     renderObject
       ..mesh = mesh
       ..angleX = angleX
@@ -91,7 +113,7 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class MeshRenderObject extends RenderBox {
+class RenderMesh extends RenderBox {
   Mesh? _mesh;
   double _angleX;
   double _angleZ;
@@ -99,7 +121,7 @@ class MeshRenderObject extends RenderBox {
   Vector3D _vCamera;
   Vector3D _lightDirection;
 
-  MeshRenderObject(
+  RenderMesh(
     this._mesh,
     this._angleX,
     this._angleZ,
