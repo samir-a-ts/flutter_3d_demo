@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage>
           width: 400,
           height: 400,
           child: ObjectWidget(
-            source: AssetObjectSource("assets/cube.obj"),
+            source: ObjectSource.fromAssets("assets/cube.obj"),
             controller: _controller,
           ),
         ),

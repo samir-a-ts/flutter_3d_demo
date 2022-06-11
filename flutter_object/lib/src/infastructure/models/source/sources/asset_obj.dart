@@ -1,9 +1,9 @@
 part of '../object_source.dart';
 
-class AssetObjectSource extends ObjectSource {
+class _AssetObjectSource extends ObjectSource {
   final String assetPath;
 
-  AssetObjectSource(this.assetPath);
+  _AssetObjectSource(this.assetPath);
 
   @override
   FutureOr<Mesh?> get data => _loadAsset(assetPath);

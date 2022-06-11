@@ -1,9 +1,9 @@
 part of '../object_source.dart';
 
-class FileObjectSource extends ObjectSource {
+class _FileObjectSource extends ObjectSource {
   final File file;
 
-  FileObjectSource(this.file);
+  _FileObjectSource(this.file);
 
   @override
   FutureOr<Mesh?> get data => _loadFile(file);

@@ -9,3 +9,4 @@ export 'src/presentation/state/object_view_controller.dart'
 export 'src/infastructure/models/source/object_source.dart';
 export 'src/infastructure/services/file_reader_service.dart' show FileReader;
 export 'src/infastructure/services/obj_reader_service.dart' show ObjReader;
+export 'src/infastructure/models/source/object_source.dart' show ObjectSource;

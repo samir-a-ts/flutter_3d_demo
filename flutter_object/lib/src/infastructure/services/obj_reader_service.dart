@@ -26,7 +26,7 @@ class ObjReader {
   }
 
   static Future<ObjFile> _parseRawData(String rawData) async {
-    final List<String> records = rawData.split(r"([^\n]*)(\n)");
+    final List<String> records = rawData.split("\n");
 
     final List<Vertex> vertexes = [];
 

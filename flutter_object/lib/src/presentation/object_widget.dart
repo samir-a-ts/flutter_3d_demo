@@ -18,7 +18,7 @@ class ObjectWidget extends StatefulWidget {
 
   const ObjectWidget({
     Key? key,
-    this.source = const EmptyObjectSource(),
+    this.source = const ObjectSource.empty(),
     this.controller,
     this.loadingPlaceholder,
   }) : super(key: key);

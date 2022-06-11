@@ -13,4 +13,11 @@ abstract class ObjectSource {
   const ObjectSource();
 
   FutureOr<Mesh?> get data;
+
+  factory ObjectSource.fromAssets(String assetsPath) =>
+      _AssetObjectSource(assetsPath);
+
+  factory ObjectSource.fromFile(File file) => _FileObjectSource(file);
+
+  const factory ObjectSource.empty() = _EmptyObjectSource;
 }

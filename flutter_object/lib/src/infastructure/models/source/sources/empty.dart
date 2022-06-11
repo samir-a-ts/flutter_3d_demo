@@ -1,7 +1,7 @@
 part of '../object_source.dart';
 
-class EmptyObjectSource extends ObjectSource {
-  const EmptyObjectSource();
+class _EmptyObjectSource extends ObjectSource {
+  const _EmptyObjectSource();
 
   @override
   FutureOr<Mesh?> get data => null;
