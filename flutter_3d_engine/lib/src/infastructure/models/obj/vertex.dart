@@ -37,4 +37,16 @@ class Vertex {
       values[3],
     );
   }
+
+  factory Vertex.fromObjRecord(String record) {
+    final splitted = record.split(" ");
+
+    final values = <double>[];
+
+    for (int i = 1; i < splitted.length; i++) {
+      values.add(double.parse(splitted[i]));
+    }
+
+    return Vertex.fromList(values);
+  }
 }

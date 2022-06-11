@@ -1,4 +1,4 @@
-import 'package:flutter_3d_engine/src/infastructure/models/3d/vector_3d.dart';
+import 'package:flutter_3d_engine/flutter_3d_engine.dart';
 import 'package:flutter_3d_engine/src/infastructure/models/obj/face.dart';
 import 'package:flutter_3d_engine/src/infastructure/models/obj/vertex.dart';
 
@@ -12,23 +12,30 @@ class ObjFile {
 
   final List<Face> faces;
 
-  final bool shadingEnabled;
-
-  // final List<ObjObject> objects;
-
-  // final List<ObjGroup> groups;
-
-  // final Map<String, MtlFile> textureData;
-
-  final List<Vector3D> vertexNormals;
-
-  ObjFile._(
+  ObjFile(
     this.vertexes,
     this.faces,
-    this.shadingEnabled,
-    // this.objects,
-    // this.groups,
-    // this.textureData,
-    this.vertexNormals,
   );
+
+  Mesh toMesh() {
+    final polygons = <Polygon>[];
+
+    for (final face in faces) {
+      final faceVertexes = face.vertexes;
+
+      final vectors = <Vector3D>[];
+
+      for (final v in faceVertexes) {
+        final vertex = vertexes[v.vertexIndex];
+
+        vectors.add(vertex.position);
+      }
+
+      polygons.add(
+        Polygon(vectors),
+      );
+    }
+
+    return Mesh(polygons);
+  }
 }

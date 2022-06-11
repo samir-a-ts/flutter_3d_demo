@@ -50,6 +50,17 @@ class Vector3D {
 
   factory Vector3D.zero() => const Vector3D(0, 0, 0);
 
+  Vector3D copy({
+    double? x,
+    double? y,
+    double? z,
+  }) =>
+      Vector3D(
+        x ?? this.x,
+        y ?? this.y,
+        z ?? this.x,
+      );
+
   @override
   String toString() {
     return '($x $y $z)';

@@ -1,7 +1,4 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_3d_engine/flutter_3d_engine.dart';
 
 void main() {
@@ -121,6 +118,8 @@ class _MyHomePageState extends State<MyHomePage>
       duration: const Duration(seconds: 10),
     );
 
+    _controller.mesh = mesh;
+
     animationC.addListener(() {
       _controller.angleX = animationC.value;
       _controller.angleZ = animationC.value;
@@ -136,10 +135,9 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       body: Center(
         child: SizedBox(
-          width: 150,
-          height: 150,
+          width: 400,
+          height: 400,
           child: ModelWidget(
-            mesh: mesh,
             controller: _controller,
           ),
         ),

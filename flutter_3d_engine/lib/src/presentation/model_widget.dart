@@ -9,13 +9,11 @@ import 'package:flutter_3d_engine/src/infastructure/models/3d/vector_3d.dart';
 import 'package:flutter_3d_engine/src/presentation/state/model_controller.dart';
 
 class ModelWidget extends StatefulWidget {
-  final Mesh mesh;
   final ModelController? controller;
 
   const ModelWidget({
     Key? key,
     this.controller,
-    required this.mesh,
   }) : super(key: key);
 
   @override
@@ -37,11 +35,12 @@ class _ModelWidgetState extends State<ModelWidget> {
       animation: _controller,
       builder: (context, _) {
         return ModelRenderObjectWidget(
-          mesh: widget.mesh,
+          mesh: _controller.mesh,
           angleX: _controller.angleX,
           angleZ: _controller.angleZ,
           offset: _controller.offset,
           vCamera: _controller.vCamera,
+          lightDirection: _controller.lightDirection,
         );
       },
     );
@@ -50,18 +49,20 @@ class _ModelWidgetState extends State<ModelWidget> {
 
 /// Cube render demo
 class ModelRenderObjectWidget extends LeafRenderObjectWidget {
-  final Mesh mesh;
+  final Mesh? mesh;
   final double angleX;
   final double angleZ;
   final double offset;
   final Vector3D vCamera;
+  final Vector3D lightDirection;
 
   const ModelRenderObjectWidget({
+    required this.mesh,
     required this.vCamera,
     required this.angleX,
     required this.angleZ,
     required this.offset,
-    required this.mesh,
+    required this.lightDirection,
     Key? key,
   }) : super(key: key);
 
@@ -73,6 +74,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
       angleZ,
       offset,
       vCamera,
+      lightDirection,
     );
   }
 
@@ -83,16 +85,19 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
       ..mesh = mesh
       ..angleX = angleX
       ..angleZ = angleZ
-      ..offset = offset;
+      ..vCamera = vCamera
+      ..offset = offset
+      ..lightDirection = lightDirection;
   }
 }
 
 class ModelRenderObject extends RenderBox {
-  Mesh _mesh;
+  Mesh? _mesh;
   double _angleX;
   double _angleZ;
   double _offset;
   Vector3D _vCamera;
+  Vector3D _lightDirection;
 
   ModelRenderObject(
     this._mesh,
@@ -100,9 +105,10 @@ class ModelRenderObject extends RenderBox {
     this._angleZ,
     this._offset,
     this._vCamera,
+    this._lightDirection,
   );
 
-  set mesh(Mesh mesh) {
+  set mesh(Mesh? mesh) {
     _mesh = mesh;
 
     markNeedsPaint();
@@ -122,6 +128,18 @@ class ModelRenderObject extends RenderBox {
 
   set offset(double offset) {
     _offset = offset;
+
+    markNeedsPaint();
+  }
+
+  set vCamera(Vector3D value) {
+    _vCamera = value;
+
+    markNeedsPaint();
+  }
+
+  set lightDirection(Vector3D value) {
+    _lightDirection = value;
 
     markNeedsPaint();
   }
@@ -158,19 +176,17 @@ class ModelRenderObject extends RenderBox {
     size = getDryLayout(constraints);
   }
 
-  void _drawMesh(PaintingContext context, Mesh mesh) {
-    final projectedMesh = _projectMesh(
+  void _drawMesh(PaintingContext context, Mesh? mesh) {
+    if (mesh == null) return;
+
+    final rotatedMesh = _rotateMesh(
       mesh: mesh,
-      widgetSize: size,
       angleX: _angleX,
       angleZ: _angleZ,
       offset: _offset,
     );
 
-    final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2
-      ..style = PaintingStyle.fill;
+    final paint = Paint()..style = PaintingStyle.fill;
 
     final canvas = context.canvas;
 
@@ -182,21 +198,6 @@ class ModelRenderObject extends RenderBox {
 
     canvas.translate(dx, dy);
 
-    for (final polygon in projectedMesh) {
-      canvas.drawPath(
-        polygon.toPath(),
-        paint,
-      );
-    }
-  }
-
-  Mesh _projectMesh({
-    required Mesh mesh,
-    required Size widgetSize,
-    double offset = 3.0,
-    double angleX = 0,
-    double angleZ = 0,
-  }) {
     const focusFar = 1000.0, focusNear = 0.1;
 
     final Matrix4 projectionMatrix = Matrix4.zero();
@@ -205,8 +206,7 @@ class ModelRenderObject extends RenderBox {
 
     final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
 
-    projectionMatrix.setEntry(
-        0, 0, (widgetSize.height / widgetSize.width) * _fFovRad);
+    projectionMatrix.setEntry(0, 0, (size.height / size.width) * _fFovRad);
     projectionMatrix.setEntry(1, 1, _fFovRad);
     projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
     projectionMatrix.setEntry(
@@ -214,7 +214,64 @@ class ModelRenderObject extends RenderBox {
     projectionMatrix.setEntry(2, 3, 1.0);
     projectionMatrix.setEntry(3, 3, 0.0);
 
-    final projectedPolygons = <Polygon>[];
+    /// Changes size of object by
+    /// screen size
+
+    final Matrix4 sizingMatrix = Matrix4.zero();
+
+    sizingMatrix.setEntry(0, 0, (size.width));
+    sizingMatrix.setEntry(1, 1, (size.height));
+    sizingMatrix.setEntry(2, 2, 1);
+    sizingMatrix.setEntry(3, 3, 1);
+
+    for (final rotatedPolygon in rotatedMesh) {
+      final normal = rotatedPolygon.calculateNormal();
+
+      final point = rotatedPolygon.first;
+
+      if (normal.x * (point.x - _vCamera.x) +
+              normal.y * (point.y - _vCamera.y) +
+              normal.z * (point.z - _vCamera.z) <
+          0) {
+        final normalizedLight = _lightDirection.normalize();
+
+        final dotProduct = normal.x * normalizedLight.x +
+            normal.y * normalizedLight.y +
+            normal.z * normalizedLight.z;
+
+        final projectedPoints = <Vector3D>[];
+
+        for (final rotatedPoint in rotatedPolygon) {
+          final projectedVector =
+              projectionMatrix.multiplyByVector(rotatedPoint);
+
+          final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
+
+          projectedPoints.add(sizedPoint);
+        }
+
+        paint.color = Color.fromRGBO(
+          (rotatedPolygon.color.red * (dotProduct)).floor(),
+          (rotatedPolygon.color.green * (dotProduct)).floor(),
+          (rotatedPolygon.color.blue * (dotProduct)).floor(),
+          rotatedPolygon.color.opacity,
+        );
+
+        canvas.drawPath(
+          Polygon(projectedPoints).toPath(),
+          paint,
+        );
+      }
+    }
+  }
+
+  Mesh _rotateMesh({
+    required Mesh mesh,
+    double offset = 3.0,
+    double angleX = 0,
+    double angleZ = 0,
+  }) {
+    final result = <Polygon>[];
 
     final Matrix4 rotationMatrixZ = Matrix4.zero();
 
@@ -240,16 +297,6 @@ class ModelRenderObject extends RenderBox {
     rotationMatrixX.setEntry(2, 2, halfCosAngle);
     rotationMatrixX.setEntry(3, 3, 1);
 
-    /// Changes size of object by
-    /// screen size
-
-    final Matrix4 sizingMatrix = Matrix4.zero();
-
-    sizingMatrix.setEntry(0, 0, (widgetSize.width));
-    sizingMatrix.setEntry(1, 1, (widgetSize.height));
-    sizingMatrix.setEntry(2, 2, 1);
-    sizingMatrix.setEntry(3, 3, 1);
-
     for (final polygon in mesh) {
       final rotatedPoints = <Vector3D>[];
 
@@ -267,43 +314,19 @@ class ModelRenderObject extends RenderBox {
 
         /// Creating some perspective
 
-        rotatedXVector = Vector3D(
-          rotatedXVector.x,
-          rotatedXVector.y,
-          rotatedXVector.z + offset,
+        rotatedXVector = rotatedXVector.copy(
+          z: rotatedXVector.z + offset,
         );
 
         rotatedPoints.add(rotatedXVector);
       }
 
-      final rotatedPolygon = Polygon(rotatedPoints);
-
-      final normal = rotatedPolygon.calculateNormal();
-
-      final point = rotatedPolygon.first;
-
-      if (normal.x * (point.x - _vCamera.x) +
-              normal.y * (point.y - _vCamera.y) +
-              normal.z * (point.z - _vCamera.z) <
-          0) {
-        final projectedPoints = <Vector3D>[];
-
-        for (final rotatedPoint in rotatedPolygon) {
-          final projectedVector =
-              projectionMatrix.multiplyByVector(rotatedPoint);
-
-          final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
-
-          projectedPoints.add(sizedPoint);
-        }
-
-        projectedPolygons.add(
-          Polygon(projectedPoints),
-        );
-      }
+      result.add(
+        Polygon(rotatedPoints),
+      );
     }
 
-    return Mesh(projectedPolygons);
+    return Mesh(result);
   }
 }
 

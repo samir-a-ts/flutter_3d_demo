@@ -75,7 +75,7 @@ class FaceVertex {
       if (value.isEmpty) {
         parsedNumbers[i] = null;
       } else {
-        parsedNumbers[i] = int.parse(value);
+        parsedNumbers[i] = int.parse(value) - 1;
       }
     }
 
