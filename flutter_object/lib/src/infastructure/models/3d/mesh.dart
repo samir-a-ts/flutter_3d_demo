@@ -1,4 +1,4 @@
-import 'package:flutter_3d_engine/src/infastructure/models/3d/polygon.dart';
+import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
 
 class Mesh extends Iterable<Polygon> {
   final List<Polygon> sides;

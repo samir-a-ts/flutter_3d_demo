@@ -1,6 +1,6 @@
-import 'package:flutter_3d_engine/flutter_3d_engine.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/obj/face.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/obj/vertex.dart';
+import 'package:flutter_object/flutter_object.dart';
+import 'package:flutter_object/src/infastructure/models/obj/face.dart';
+import 'package:flutter_object/src/infastructure/models/obj/vertex.dart';
 
 /// Class with .OBJ file data.
 ///

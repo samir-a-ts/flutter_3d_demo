@@ -1,15 +1,15 @@
 import 'dart:math';
 
-import 'package:flutter_3d_engine/src/core/math/matrix.dart';
+import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/3d/mesh.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/3d/polygon.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/3d/vector_3d.dart';
-import 'package:flutter_3d_engine/src/presentation/state/model_controller.dart';
+import 'package:flutter_object/src/infastructure/models/3d/mesh.dart';
+import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
+import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
+import 'package:flutter_object/src/presentation/state/model_controller.dart';
 
 class ModelWidget extends StatefulWidget {
-  final ModelController? controller;
+  final ObjectViewController? controller;
 
   const ModelWidget({
     Key? key,
@@ -21,11 +21,12 @@ class ModelWidget extends StatefulWidget {
 }
 
 class _ModelWidgetState extends State<ModelWidget> {
-  late ModelController _controller;
+  late ObjectViewController _controller;
 
   @override
   void initState() {
-    _controller = widget.controller ?? ModelController();
+    _controller = widget.controller ?? ObjectViewController();
+
     super.initState();
   }
 
@@ -34,8 +35,7 @@ class _ModelWidgetState extends State<ModelWidget> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        return ModelRenderObjectWidget(
-          mesh: _controller.mesh,
+        return MeshRenderObjectWidget(
           angleX: _controller.angleX,
           angleZ: _controller.angleZ,
           offset: _controller.offset,
@@ -48,7 +48,7 @@ class _ModelWidgetState extends State<ModelWidget> {
 }
 
 /// Cube render demo
-class ModelRenderObjectWidget extends LeafRenderObjectWidget {
+class MeshRenderObjectWidget extends LeafRenderObjectWidget {
   final Mesh? mesh;
   final double angleX;
   final double angleZ;
@@ -56,7 +56,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
   final Vector3D vCamera;
   final Vector3D lightDirection;
 
-  const ModelRenderObjectWidget({
+  const MeshRenderObjectWidget({
     required this.mesh,
     required this.vCamera,
     required this.angleX,
@@ -68,7 +68,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return ModelRenderObject(
+    return MeshRenderObject(
       mesh,
       angleX,
       angleZ,
@@ -80,7 +80,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant ModelRenderObject renderObject) {
+      BuildContext context, covariant MeshRenderObject renderObject) {
     renderObject
       ..mesh = mesh
       ..angleX = angleX
@@ -91,7 +91,7 @@ class ModelRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class ModelRenderObject extends RenderBox {
+class MeshRenderObject extends RenderBox {
   Mesh? _mesh;
   double _angleX;
   double _angleZ;
@@ -99,7 +99,7 @@ class ModelRenderObject extends RenderBox {
   Vector3D _vCamera;
   Vector3D _lightDirection;
 
-  ModelRenderObject(
+  MeshRenderObject(
     this._mesh,
     this._angleX,
     this._angleZ,
@@ -157,7 +157,7 @@ class ModelRenderObject extends RenderBox {
     /// and with dimension null.
     if (constraints.hasInfiniteMaxHeight && constraints.hasInfiniteMaxWidth) {
       throw FlutterError(
-          "ReichWidget cannot be built without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
+          "MeshWidget cannot be drawn without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
     }
 
     if (constraints.hasInfiniteMaxWidth) {

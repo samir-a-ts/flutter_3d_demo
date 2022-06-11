@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_engine/flutter_3d_engine.dart';
+import 'package:flutter_object/flutter_object.dart';
 
 void main() {
   runApp(const MyApp());
@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage>
     ],
   );
 
-  final _controller = ModelController();
+  final _controller = ObjectViewController();
 
   @override
   void initState() {

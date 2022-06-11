@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/3d/vector_3d.dart';
+import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 
 /// A surface in 3D space
 /// represented by a set of [Vector3D]'s.

@@ -1,4 +1,4 @@
-package com.example.flutter_3d_demo
+package com.example.flutter_object_demo
 
 import io.flutter.embedding.android.FlutterActivity
 

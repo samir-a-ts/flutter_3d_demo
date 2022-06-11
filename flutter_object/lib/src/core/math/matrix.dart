@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/3d/vector_3d.dart';
+import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 
 extension MatrixExt on Matrix4 {
   Vector3D multiplyByVector(Vector3D v) {

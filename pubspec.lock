@@ -62,10 +62,10 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_3d_engine:
+  flutter_object:
     dependency: "direct main"
     description:
-      path: flutter_3d_engine
+      path: flutter_object
       relative: true
     source: path
     version: "0.0.1"

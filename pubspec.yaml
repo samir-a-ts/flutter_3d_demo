@@ -1,4 +1,4 @@
-name: flutter_3d_demo
+name: flutter_object_demo
 description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -15,8 +15,8 @@ dependencies:
 
   cupertino_icons: ^1.0.2
 
-  flutter_3d_engine:
-    path: ./flutter_3d_engine/
+  flutter_object:
+    path: ./flutter_object/
 
 dev_dependencies:
   flutter_test:

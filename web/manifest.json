@@ -1,6 +1,6 @@
 {
-    "name": "flutter_3d_demo",
-    "short_name": "flutter_3d_demo",
+    "name": "flutter_object_demo",
+    "short_name": "flutter_object_demo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

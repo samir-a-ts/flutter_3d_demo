@@ -1,4 +1,4 @@
-# flutter_3d_demo
+# flutter_object_demo
 
 A new Flutter project.
 

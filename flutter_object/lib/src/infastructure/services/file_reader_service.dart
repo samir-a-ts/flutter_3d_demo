@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter_3d_engine/src/infastructure/models/3d/mesh.dart';
-import 'package:flutter_3d_engine/src/infastructure/models/obj/obj_file.dart';
-import 'package:flutter_3d_engine/src/infastructure/services/obj_reader_service.dart';
+import 'package:flutter_object/src/infastructure/models/3d/mesh.dart';
+import 'package:flutter_object/src/infastructure/models/obj/obj_file.dart';
+import 'package:flutter_object/src/infastructure/services/obj_reader_service.dart';
 
 class FileReader {
   static Future<Mesh> loadFile(File file) async {

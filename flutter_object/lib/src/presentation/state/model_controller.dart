@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_3d_engine/flutter_3d_engine.dart';
+import 'package:flutter_object/flutter_object.dart';
 
-class ModelController extends ChangeNotifier {
-  Mesh? _mesh;
+class ObjectViewController extends ChangeNotifier {
   double? _angleX;
   double? _angleZ;
   double? _offset;
   Vector3D? _vCamera;
   Vector3D? _lightDirection;
 
-  ModelController({
-    Mesh? mesh,
+  ObjectViewController({
     double angleX = 0,
     double angleZ = 0,
     double offset = 3.0,
@@ -22,10 +20,7 @@ class ModelController extends ChangeNotifier {
     _offset = offset;
     _vCamera = vCamera;
     _lightDirection = lightDirection;
-    _mesh = mesh;
   }
-
-  Mesh? get mesh => _mesh;
 
   double get angleX => _angleX!;
 
@@ -36,12 +31,6 @@ class ModelController extends ChangeNotifier {
   Vector3D get vCamera => _vCamera!;
 
   Vector3D get lightDirection => _lightDirection!;
-
-  set mesh(Mesh? mesh) {
-    _mesh = mesh;
-
-    notifyListeners();
-  }
 
   set angleX(double value) {
     if (value == _angleX) return;

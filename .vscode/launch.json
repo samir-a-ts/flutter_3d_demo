@@ -5,38 +5,38 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "flutter_3d_demo",
+            "name": "flutter_object_demo",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "flutter_3d_demo (profile mode)",
+            "name": "flutter_object_demo (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "flutter_3d_demo (release mode)",
+            "name": "flutter_object_demo (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
         },
         {
-            "name": "flutter_3d_engine",
-            "cwd": "flutter_3d_engine",
+            "name": "flutter_object",
+            "cwd": "flutter_object",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "flutter_3d_engine (profile mode)",
-            "cwd": "flutter_3d_engine",
+            "name": "flutter_object (profile mode)",
+            "cwd": "flutter_object",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "flutter_3d_engine (release mode)",
-            "cwd": "flutter_3d_engine",
+            "name": "flutter_object (release mode)",
+            "cwd": "flutter_object",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
