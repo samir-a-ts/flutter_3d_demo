@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -49,6 +50,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
               return ObjectRenderWidget(
                 object: snapshot.data,
                 angleX: _controller.angleX,
+                angleY: _controller.angleY,
                 angleZ: _controller.angleZ,
                 offset: _controller.offset,
                 vCamera: _controller.vCamera,
@@ -74,6 +76,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 class ObjectRenderWidget extends LeafRenderObjectWidget {
   final Object? object;
   final double angleX;
+  final double angleY;
   final double angleZ;
   final double offset;
   final Vector3D vCamera;
@@ -85,6 +88,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
     required this.object,
     required this.vCamera,
     required this.angleX,
+    required this.angleY,
     required this.angleZ,
     required this.offset,
     required this.lightDirection,
@@ -96,6 +100,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
     return RenderObject(
       object,
       angleX,
+      angleY,
       angleZ,
       offset,
       vCamera,
@@ -110,6 +115,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
     renderObject
       ..object = object
       ..angleX = angleX
+      ..angleY = angleY
       ..angleZ = angleZ
       ..vCamera = vCamera
       ..offset = offset
@@ -121,6 +127,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
 class RenderObject extends RenderBox {
   Object? _object;
   double _angleX;
+  double _angleY;
   double _angleZ;
   double _offset;
   Vector3D _vCamera;
@@ -130,6 +137,7 @@ class RenderObject extends RenderBox {
   RenderObject(
     this._object,
     this._angleX,
+    this._angleY,
     this._angleZ,
     this._offset,
     this._vCamera,
@@ -145,6 +153,12 @@ class RenderObject extends RenderBox {
 
   set angleX(double angleX) {
     _angleX = angleX;
+
+    markNeedsPaint();
+  }
+
+  set angleY(double angleY) {
+    _angleY = angleY;
 
     markNeedsPaint();
   }
@@ -214,16 +228,14 @@ class RenderObject extends RenderBox {
   void _drawObject(PaintingContext context, Object? object) {
     if (object == null) return;
 
-    final rotatedObject = _rotateObject(
+    final projectedObject = _projectObject(
       object: object,
+      widgetSize: size,
       angleX: _angleX,
+      angleY: _angleY,
       angleZ: _angleZ,
       offset: _offset,
     );
-
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    final canvas = context.canvas;
 
     final global = localToGlobal(Offset.zero);
 
@@ -231,97 +243,56 @@ class RenderObject extends RenderBox {
 
     final dy = global.dy + (size.height / 2);
 
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    final canvas = context.canvas;
+
     canvas.translate(
       dx + _translation.dx,
       dy + _translation.dy,
     );
 
-    const focusFar = 1000.0, focusNear = 0.1;
-
-    final Matrix4 projectionMatrix = Matrix4.zero();
-
-    const _fFov = 90.0;
-
-    final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
-
-    projectionMatrix.setEntry(0, 0, (size.height / size.width) * _fFovRad);
-    projectionMatrix.setEntry(1, 1, _fFovRad);
-    projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
-    projectionMatrix.setEntry(
-        3, 2, (-focusFar * focusNear) / (focusFar - focusNear));
-    projectionMatrix.setEntry(2, 3, 1.0);
-    projectionMatrix.setEntry(3, 3, 0.0);
-
-    /// Changes size of object by
-    /// screen size
-
-    final Matrix4 sizingMatrix = Matrix4.zero();
-
-    sizingMatrix.setEntry(0, 0, (size.width * .5));
-    sizingMatrix.setEntry(1, 1, (size.height * .5));
-    sizingMatrix.setEntry(2, 2, 1);
-    sizingMatrix.setEntry(3, 3, 1);
-
-    for (final rotatedPolygon in rotatedObject) {
-      final normal = rotatedPolygon.calculateNormal();
-
-      final point = rotatedPolygon.first;
-
-      if (normal.x * (point.x - _vCamera.x) +
-              normal.y * (point.y - _vCamera.y) +
-              normal.z * (point.z - _vCamera.z) <
-          0) {
-        final normalizedLight = _lightDirection.normalize();
-
-        final dotProduct = normal.x * normalizedLight.x +
-            normal.y * normalizedLight.y +
-            normal.z * normalizedLight.z;
-
-        final projectedPoints = <Vector3D>[];
-
-        for (final rotatedPoint in rotatedPolygon) {
-          final projectedVector =
-              projectionMatrix.multiplyByVector(rotatedPoint);
-
-          final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
-
-          projectedPoints.add(sizedPoint);
-        }
-
-        paint.color = Color.fromRGBO(
-          (rotatedPolygon.color.red * (dotProduct)).floor(),
-          (rotatedPolygon.color.green * (dotProduct)).floor(),
-          (rotatedPolygon.color.blue * (dotProduct)).floor(),
-          rotatedPolygon.color.opacity,
-        );
-
-        canvas.drawPath(
-          Polygon(projectedPoints).toPath(),
-          paint,
-        );
-      }
+    for (final polygon in projectedObject) {
+      canvas.drawPath(
+        polygon.toPath(),
+        paint..color = polygon.color,
+      );
     }
   }
 
-  Object _rotateObject({
+  Object _projectObject({
     required Object object,
+    required Size widgetSize,
     double offset = 3.0,
     double angleX = 0,
     double angleZ = 0,
+    double angleY = pi / 4,
   }) {
-    final result = <Polygon>[];
+    final rotatedPolygons = <Polygon>[];
+
+    final cosAngleZ = cos(angleZ);
+    final sinAngleZ = sin(angleZ);
 
     final Matrix4 rotationMatrixZ = Matrix4.zero();
 
-    final cosAngle = cos(angleZ);
-    final sinAngle = sin(angleZ);
-
-    rotationMatrixZ.setEntry(0, 0, cosAngle);
-    rotationMatrixZ.setEntry(0, 1, sinAngle);
-    rotationMatrixZ.setEntry(1, 0, -sinAngle);
-    rotationMatrixZ.setEntry(1, 1, cosAngle);
+    rotationMatrixZ.setEntry(0, 0, cosAngleZ);
+    rotationMatrixZ.setEntry(0, 1, sinAngleZ);
+    rotationMatrixZ.setEntry(1, 0, -sinAngleZ);
+    rotationMatrixZ.setEntry(1, 1, cosAngleZ);
     rotationMatrixZ.setEntry(2, 2, 1);
     rotationMatrixZ.setEntry(3, 3, 1);
+
+    final cosAngleY = cos(angleY);
+    final sinAngleY = sin(angleY);
+
+    final Matrix4 rotationMatrixY = Matrix4.zero();
+
+    rotationMatrixY.setEntry(0, 0, cosAngleY);
+    rotationMatrixY.setEntry(0, 2, sinAngleY);
+    rotationMatrixY.setEntry(1, 1, 1);
+    rotationMatrixY.setEntry(2, 0, -sinAngleY);
+    rotationMatrixY.setEntry(2, 2, cosAngleY);
+    rotationMatrixY.setEntry(3, 3, 1);
 
     final Matrix4 rotationMatrixX = Matrix4.zero();
 
@@ -350,21 +321,93 @@ class RenderObject extends RenderBox {
         Vector3D rotatedXVector =
             rotationMatrixX.multiplyByVector(rotatedZVector);
 
+        /// By Y axis
+        Vector3D rotatedYVector =
+            rotationMatrixY.multiplyByVector(rotatedXVector);
+
         /// Creating some perspective
 
-        rotatedXVector = rotatedXVector.copy(
-          z: rotatedXVector.z + offset,
+        rotatedYVector = rotatedYVector.copy(
+          z: rotatedYVector.z + offset,
         );
 
-        rotatedPoints.add(rotatedXVector);
+        rotatedPoints.add(rotatedYVector);
       }
 
-      result.add(
+      rotatedPolygons.add(
         Polygon(rotatedPoints),
       );
     }
 
-    return Object(result);
+    const focusFar = 1000.0, focusNear = 0.1;
+
+    final Matrix4 projectionMatrix = Matrix4.zero();
+
+    const _fFov = 90.0;
+
+    final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
+
+    projectionMatrix.setEntry(0, 0, (size.height / size.width) * _fFovRad);
+    projectionMatrix.setEntry(1, 1, _fFovRad);
+    projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
+    projectionMatrix.setEntry(
+        3, 2, (-focusFar * focusNear) / (focusFar - focusNear));
+    projectionMatrix.setEntry(2, 3, 1.0);
+    projectionMatrix.setEntry(3, 3, 0.0);
+
+    /// Changes size of object by
+    /// screen size
+
+    final Matrix4 sizingMatrix = Matrix4.zero();
+
+    sizingMatrix.setEntry(0, 0, (size.width * .5));
+    sizingMatrix.setEntry(1, 1, (size.height * .5));
+    sizingMatrix.setEntry(2, 2, 1);
+    sizingMatrix.setEntry(3, 3, 1);
+
+    final projectedPolygons = <Polygon>[];
+
+    for (final rotatedPolygon in rotatedPolygons) {
+      final normal = rotatedPolygon.calculateNormal();
+
+      final point = rotatedPolygon.first;
+
+      if (normal.x * (point.x - _vCamera.x) +
+              normal.y * (point.y - _vCamera.y) +
+              normal.z * (point.z - _vCamera.z) <
+          0) {
+        final normalizedLight = _lightDirection.normalize();
+
+        final dotProduct = normal.x * normalizedLight.x +
+            normal.y * normalizedLight.y +
+            normal.z * normalizedLight.z;
+
+        final projectedPoints = <Vector3D>[];
+
+        for (final rotatedPoint in rotatedPolygon) {
+          final projectedVector =
+              projectionMatrix.multiplyByVector(rotatedPoint);
+
+          final sizedPoint = sizingMatrix.multiplyByVector(projectedVector);
+
+          projectedPoints.add(sizedPoint);
+        }
+
+        projectedPolygons.add(
+          Polygon(
+            projectedPoints,
+            Color.fromRGBO(
+              (rotatedPolygon.color.red * (dotProduct)).floor(),
+              (rotatedPolygon.color.green * (dotProduct)).floor(),
+              (rotatedPolygon.color.blue * (dotProduct)).floor(),
+              rotatedPolygon.color.opacity,
+            ),
+          ),
+        );
+      }
+    }
+
+    return Object(projectedPolygons);
   }
 }
 

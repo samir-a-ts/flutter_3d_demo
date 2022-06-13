@@ -39,4 +39,14 @@ class Polygon extends Iterable<Vector3D> {
 
     return normal.normalize();
   }
+
+  Polygon copyWith({
+    List<Vector3D>? points,
+    Color? color,
+  }) {
+    return Polygon(
+      points ?? this.points,
+      color ?? this.color,
+    );
+  }
 }

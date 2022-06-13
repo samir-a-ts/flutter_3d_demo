@@ -29,26 +29,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> {
   final _controller = ObjectViewController();
-
-  late AnimationController animationC;
-
-  @override
-  void initState() {
-    animationC = AnimationController(
-      vsync: this,
-      lowerBound: 0,
-      upperBound: 10,
-    );
-
-    animationC.addListener(() {
-      _controller.angleX = animationC.value;
-    });
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +46,7 @@ class _MyHomePageState extends State<MyHomePage>
                 source: ObjectSource.fromAssets("assets/FinalBaseMesh.obj"),
                 controller: _controller
                   ..offset = 12
-                  ..angleZ = pi / 6
-                  ..angleX = pi / 4
-                  ..translation = const Offset(300, 300),
+                  ..angleY = -pi / 6,
               ),
             ),
           ),
@@ -80,14 +60,14 @@ class _MyHomePageState extends State<MyHomePage>
                 width: 400,
                 height: 20,
                 child: AnimatedBuilder(
-                  animation: animationC,
+                  animation: _controller,
                   builder: (context, snapshot) {
                     return Slider(
-                      value: _controller.angleX,
-                      min: 0.0,
-                      max: 10.0,
-                      onChanged: (_) {
-                        animationC.value = _;
+                      value: _controller.angleY + 2 * pi,
+                      min: 0,
+                      max: 4 * pi,
+                      onChanged: (value) {
+                        _controller.angleY = value - 2 * pi;
                       },
                     );
                   },

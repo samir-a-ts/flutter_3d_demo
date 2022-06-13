@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_object/flutter_object.dart';
 
 class ObjectViewController extends ChangeNotifier {
   double? _angleX;
   double? _angleZ;
+  double? _angleY;
   double? _offset;
   Vector3D? _vCamera;
   Vector3D? _lightDirection;
@@ -12,12 +15,14 @@ class ObjectViewController extends ChangeNotifier {
   ObjectViewController({
     double angleX = 0,
     double angleZ = 0,
+    double angleY = 0,
     double offset = 3.0,
     Vector3D vCamera = const Vector3D(0, 0, 0),
     Vector3D lightDirection = const Vector3D(0, 0, -1),
     Offset translation = Offset.zero,
   }) {
     _angleX = angleX;
+    _angleY = angleY;
     _angleZ = angleZ;
     _offset = offset;
     _vCamera = vCamera;
@@ -26,6 +31,8 @@ class ObjectViewController extends ChangeNotifier {
   }
 
   double get angleX => _angleX!;
+
+  double get angleY => _angleY!;
 
   double get angleZ => _angleZ!;
 
@@ -41,6 +48,14 @@ class ObjectViewController extends ChangeNotifier {
     if (value == _angleX) return;
 
     _angleX = value;
+
+    notifyListeners();
+  }
+
+  set angleY(double value) {
+    if (value == _angleY) return;
+
+    _angleY = value;
 
     notifyListeners();
   }
