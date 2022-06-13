@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -40,7 +39,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Object?>(
+    return FutureBuilder<ObjectModel?>(
       future: _loadObjectFromSource(widget.source),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -66,7 +65,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
     );
   }
 
-  Future<Object?> _loadObjectFromSource(ObjectSource? source) async {
+  Future<ObjectModel?> _loadObjectFromSource(ObjectSource? source) async {
     final object = await source?.data;
 
     return object;
@@ -74,7 +73,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 }
 
 class ObjectRenderWidget extends LeafRenderObjectWidget {
-  final Object? object;
+  final ObjectModel? object;
   final double angleX;
   final double angleY;
   final double angleZ;
@@ -125,7 +124,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
 }
 
 class RenderObject extends RenderBox {
-  Object? _object;
+  ObjectModel? _object;
   double _angleX;
   double _angleY;
   double _angleZ;
@@ -145,7 +144,7 @@ class RenderObject extends RenderBox {
     this._translation,
   );
 
-  set object(Object? object) {
+  set object(ObjectModel? object) {
     _object = object;
 
     markNeedsPaint();
@@ -225,7 +224,7 @@ class RenderObject extends RenderBox {
     size = getDryLayout(constraints);
   }
 
-  void _drawObject(PaintingContext context, Object? object) {
+  void _drawObject(PaintingContext context, ObjectModel? object) {
     if (object == null) return;
 
     final projectedObject = _projectObject(
@@ -260,8 +259,8 @@ class RenderObject extends RenderBox {
     }
   }
 
-  Object _projectObject({
-    required Object object,
+  ObjectModel _projectObject({
+    required ObjectModel object,
     required Size widgetSize,
     double offset = 3.0,
     double angleX = 0,
@@ -407,7 +406,7 @@ class RenderObject extends RenderBox {
       }
     }
 
-    return Object(projectedPolygons);
+    return ObjectModel(projectedPolygons);
   }
 }
 

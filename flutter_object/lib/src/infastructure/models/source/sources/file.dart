@@ -6,11 +6,11 @@ class _FileObjectSource extends ObjectSource {
   _FileObjectSource(this.file);
 
   @override
-  FutureOr<Object?> get data => _loadFile(file);
+  FutureOr<ObjectModel?> get data => _loadFile(file);
 
-  Future<Object?> _loadFile(File file) async {
+  Future<ObjectModel?> _loadFile(File file) async {
     try {
-      final result = await FileReader.loadFile(file);
+      final result = await FileReader.loadFromFile(file);
 
       return result;
     } catch (e) {

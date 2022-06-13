@@ -17,7 +17,7 @@ class ObjFile {
     this.faces,
   );
 
-  Object toObject() {
+  ObjectModel toObject() {
     final polygons = <Polygon>[];
 
     for (final face in faces) {
@@ -36,6 +36,6 @@ class ObjFile {
       );
     }
 
-    return Object(polygons);
+    return ObjectModel(polygons);
   }
 }

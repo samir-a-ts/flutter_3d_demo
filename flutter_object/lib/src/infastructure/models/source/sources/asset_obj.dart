@@ -6,13 +6,13 @@ class _AssetObjectSource extends ObjectSource {
   _AssetObjectSource(this.assetPath);
 
   @override
-  FutureOr<Object?> get data => _loadAsset(assetPath);
+  FutureOr<ObjectModel?> get data => _loadAsset(assetPath);
 
-  Future<Object?> _loadAsset(String path) async {
+  Future<ObjectModel?> _loadAsset(String path) async {
     try {
-      final objFile = await ObjReader.readFromAssets(path);
+      final objFile = await FileReader.loadFromAssets(path);
 
-      return objFile.toObject();
+      return objFile;
     } catch (e) {
       return null;
     }

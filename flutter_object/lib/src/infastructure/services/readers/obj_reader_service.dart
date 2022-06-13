@@ -1,31 +1,14 @@
-// ([^\n]*)(\n)
-
-import 'dart:io';
-
-import 'package:flutter/services.dart';
+import 'package:flutter_object/flutter_object.dart';
 import 'package:flutter_object/src/infastructure/models/obj/face.dart';
 import 'package:flutter_object/src/infastructure/models/obj/obj_file.dart';
 import 'package:flutter_object/src/infastructure/models/obj/vertex.dart';
+import 'package:flutter_object/src/infastructure/services/readers/object_reader.dart';
 
 /// Static class that holds
 /// .OBJ files parse logic.
-class ObjReader {
-  static Future<ObjFile> readFromString(String rawData) =>
-      _parseRawData(rawData);
-
-  static Future<ObjFile> readFromAssets(String assetsPath) async {
-    final rawData = await rootBundle.loadString(assetsPath);
-
-    return _parseRawData(rawData);
-  }
-
-  static Future<ObjFile> readFromFile(File file) async {
-    final rawData = await file.readAsString();
-
-    return _parseRawData(rawData);
-  }
-
-  static Future<ObjFile> _parseRawData(String rawData) async {
+class ObjReader extends ObjectReader {
+  @override
+  Future<ObjectModel> parseRawData(String rawData) {
     final List<String> records = rawData.split("\n");
 
     final List<Vertex> vertexes = [];
@@ -50,7 +33,7 @@ class ObjReader {
       }
     }
 
-    return ObjFile(vertexes, faces);
+    return Future.value(ObjFile(vertexes, faces).toObject());
   }
 }
 

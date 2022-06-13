@@ -4,5 +4,5 @@ class _EmptyObjectSource extends ObjectSource {
   const _EmptyObjectSource();
 
   @override
-  FutureOr<Object?> get data => null;
+  FutureOr<ObjectModel?> get data => null;
 }
