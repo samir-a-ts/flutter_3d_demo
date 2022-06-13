@@ -64,7 +64,9 @@ class _MyHomePageState extends State<MyHomePage>
                 source: ObjectSource.fromAssets("assets/FinalBaseMesh.obj"),
                 controller: _controller
                   ..offset = 12
-                  ..angleZ = 0,
+                  ..angleZ = pi / 6
+                  ..angleX = pi / 4
+                  ..translation = const Offset(300, 300),
               ),
             ),
           ),

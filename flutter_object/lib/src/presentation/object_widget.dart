@@ -53,6 +53,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
                 offset: _controller.offset,
                 vCamera: _controller.vCamera,
                 lightDirection: _controller.lightDirection,
+                translation: _controller.translation,
               );
             },
           );
@@ -77,8 +78,10 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
   final double offset;
   final Vector3D vCamera;
   final Vector3D lightDirection;
+  final Offset translation;
 
   const ObjectRenderWidget({
+    required this.translation,
     required this.object,
     required this.vCamera,
     required this.angleX,
@@ -97,6 +100,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
       offset,
       vCamera,
       lightDirection,
+      translation,
     );
   }
 
@@ -109,7 +113,8 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
       ..angleZ = angleZ
       ..vCamera = vCamera
       ..offset = offset
-      ..lightDirection = lightDirection;
+      ..lightDirection = lightDirection
+      ..translation = translation;
   }
 }
 
@@ -120,6 +125,7 @@ class RenderObject extends RenderBox {
   double _offset;
   Vector3D _vCamera;
   Vector3D _lightDirection;
+  Offset _translation;
 
   RenderObject(
     this._object,
@@ -128,6 +134,7 @@ class RenderObject extends RenderBox {
     this._offset,
     this._vCamera,
     this._lightDirection,
+    this._translation,
   );
 
   set object(Object? object) {
@@ -162,6 +169,12 @@ class RenderObject extends RenderBox {
 
   set lightDirection(Vector3D value) {
     _lightDirection = value;
+
+    markNeedsPaint();
+  }
+
+  set translation(Offset value) {
+    _translation = value;
 
     markNeedsPaint();
   }
@@ -218,7 +231,10 @@ class RenderObject extends RenderBox {
 
     final dy = global.dy + (size.height / 2);
 
-    canvas.translate(dx, dy);
+    canvas.translate(
+      dx + _translation.dx,
+      dy + _translation.dy,
+    );
 
     const focusFar = 1000.0, focusNear = 0.1;
 

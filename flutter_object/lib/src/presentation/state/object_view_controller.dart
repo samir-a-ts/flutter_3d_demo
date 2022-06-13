@@ -7,6 +7,7 @@ class ObjectViewController extends ChangeNotifier {
   double? _offset;
   Vector3D? _vCamera;
   Vector3D? _lightDirection;
+  Offset? _translation;
 
   ObjectViewController({
     double angleX = 0,
@@ -14,12 +15,14 @@ class ObjectViewController extends ChangeNotifier {
     double offset = 3.0,
     Vector3D vCamera = const Vector3D(0, 0, 0),
     Vector3D lightDirection = const Vector3D(0, 0, -1),
+    Offset translation = Offset.zero,
   }) {
     _angleX = angleX;
     _angleZ = angleZ;
     _offset = offset;
     _vCamera = vCamera;
     _lightDirection = lightDirection;
+    _translation = translation;
   }
 
   double get angleX => _angleX!;
@@ -31,6 +34,8 @@ class ObjectViewController extends ChangeNotifier {
   Vector3D get vCamera => _vCamera!;
 
   Vector3D get lightDirection => _lightDirection!;
+
+  Offset get translation => _translation!;
 
   set angleX(double value) {
     if (value == _angleX) return;
@@ -68,6 +73,14 @@ class ObjectViewController extends ChangeNotifier {
     if (value == _lightDirection) return;
 
     _lightDirection = value;
+
+    notifyListeners();
+  }
+
+  set translation(Offset value) {
+    if (value == _translation) return;
+
+    _translation = value;
 
     notifyListeners();
   }
