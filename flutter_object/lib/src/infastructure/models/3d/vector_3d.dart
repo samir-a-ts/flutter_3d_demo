@@ -65,4 +65,11 @@ class Vector3D {
   String toString() {
     return '($x $y $z)';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is Vector3D && other.x == x && other.y == y && other.z == z;
+
+  @override
+  int get hashCode => ((x + y + z) * 10000).floor();
 }

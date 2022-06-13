@@ -17,19 +17,19 @@ class Face {
   factory Face.fromString(String data) {
     final List<String> rawData = data.trim().split(' ');
 
-    rawData.removeWhere((element) => element.isEmpty);
-
     /// "f" letter may be ignored.
-    rawData.removeAt(0);
+    rawData.remove('f');
 
     assert(rawData.length > 2);
 
     final List<FaceVertex> resultVertexes = [];
 
     for (final side in rawData) {
-      resultVertexes.add(
-        FaceVertex.fromString(side),
-      );
+      if (side.isNotEmpty) {
+        resultVertexes.add(
+          FaceVertex.fromString(side),
+        );
+      }
     }
 
     return Face._(resultVertexes);

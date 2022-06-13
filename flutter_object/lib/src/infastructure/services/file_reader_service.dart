@@ -9,6 +9,9 @@ class FileReader {
     "obj": ObjReader(),
   };
 
+  static void registerReader(String fileType, ObjectReader reader) =>
+      _readers[fileType] = reader;
+
   static Future<ObjectModel> loadFromFile(File file) async {
     final type = file.path.getFileType();
 
