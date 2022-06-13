@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_object/src/infastructure/models/3d/mesh.dart';
+import 'package:flutter_object/src/infastructure/models/3d/object.dart';
 import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
 import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 import 'package:flutter_object/src/infastructure/models/source/object_source.dart';
@@ -39,15 +39,15 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Mesh?>(
+    return FutureBuilder<Object?>(
       future: _loadObjectFromSource(widget.source),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              return MeshRenderObjectWidget(
-                mesh: snapshot.data,
+              return ObjectRenderWidget(
+                object: snapshot.data,
                 angleX: _controller.angleX,
                 angleZ: _controller.angleZ,
                 offset: _controller.offset,
@@ -63,23 +63,23 @@ class _ObjectWidgetState extends State<ObjectWidget> {
     );
   }
 
-  Future<Mesh?> _loadObjectFromSource(ObjectSource? source) async {
-    final mesh = await source?.data;
+  Future<Object?> _loadObjectFromSource(ObjectSource? source) async {
+    final object = await source?.data;
 
-    return mesh;
+    return object;
   }
 }
 
-class MeshRenderObjectWidget extends LeafRenderObjectWidget {
-  final Mesh? mesh;
+class ObjectRenderWidget extends LeafRenderObjectWidget {
+  final Object? object;
   final double angleX;
   final double angleZ;
   final double offset;
   final Vector3D vCamera;
   final Vector3D lightDirection;
 
-  const MeshRenderObjectWidget({
-    required this.mesh,
+  const ObjectRenderWidget({
+    required this.object,
     required this.vCamera,
     required this.angleX,
     required this.angleZ,
@@ -90,8 +90,8 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderMesh(
-      mesh,
+    return RenderObject(
+      object,
       angleX,
       angleZ,
       offset,
@@ -102,9 +102,9 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderMesh renderObject) {
+      BuildContext context, covariant RenderObject renderObject) {
     renderObject
-      ..mesh = mesh
+      ..object = object
       ..angleX = angleX
       ..angleZ = angleZ
       ..vCamera = vCamera
@@ -113,16 +113,16 @@ class MeshRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class RenderMesh extends RenderBox {
-  Mesh? _mesh;
+class RenderObject extends RenderBox {
+  Object? _object;
   double _angleX;
   double _angleZ;
   double _offset;
   Vector3D _vCamera;
   Vector3D _lightDirection;
 
-  RenderMesh(
-    this._mesh,
+  RenderObject(
+    this._object,
     this._angleX,
     this._angleZ,
     this._offset,
@@ -130,8 +130,8 @@ class RenderMesh extends RenderBox {
     this._lightDirection,
   );
 
-  set mesh(Mesh? mesh) {
-    _mesh = mesh;
+  set object(Object? object) {
+    _object = object;
 
     markNeedsPaint();
   }
@@ -170,7 +170,7 @@ class RenderMesh extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     layer ??= ContainerLayer();
 
-    _drawMesh(context, _mesh);
+    _drawObject(context, _object);
   }
 
   @override
@@ -179,7 +179,7 @@ class RenderMesh extends RenderBox {
     /// and with dimension null.
     if (constraints.hasInfiniteMaxHeight && constraints.hasInfiniteMaxWidth) {
       throw FlutterError(
-          "MeshWidget cannot be drawn without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
+          "ObjectWidget cannot be drawn without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
     }
 
     if (constraints.hasInfiniteMaxWidth) {
@@ -198,11 +198,11 @@ class RenderMesh extends RenderBox {
     size = getDryLayout(constraints);
   }
 
-  void _drawMesh(PaintingContext context, Mesh? mesh) {
-    if (mesh == null) return;
+  void _drawObject(PaintingContext context, Object? object) {
+    if (object == null) return;
 
-    final rotatedMesh = _rotateMesh(
-      mesh: mesh,
+    final rotatedObject = _rotateObject(
+      object: object,
       angleX: _angleX,
       angleZ: _angleZ,
       offset: _offset,
@@ -246,7 +246,7 @@ class RenderMesh extends RenderBox {
     sizingMatrix.setEntry(2, 2, 1);
     sizingMatrix.setEntry(3, 3, 1);
 
-    for (final rotatedPolygon in rotatedMesh) {
+    for (final rotatedPolygon in rotatedObject) {
       final normal = rotatedPolygon.calculateNormal();
 
       final point = rotatedPolygon.first;
@@ -287,8 +287,8 @@ class RenderMesh extends RenderBox {
     }
   }
 
-  Mesh _rotateMesh({
-    required Mesh mesh,
+  Object _rotateObject({
+    required Object object,
     double offset = 3.0,
     double angleX = 0,
     double angleZ = 0,
@@ -319,7 +319,7 @@ class RenderMesh extends RenderBox {
     rotationMatrixX.setEntry(2, 2, halfCosAngle);
     rotationMatrixX.setEntry(3, 3, 1);
 
-    for (final polygon in mesh) {
+    for (final polygon in object) {
       final rotatedPoints = <Vector3D>[];
 
       for (final point in polygon) {
@@ -348,7 +348,7 @@ class RenderMesh extends RenderBox {
       );
     }
 
-    return Mesh(result);
+    return Object(result);
   }
 }
 

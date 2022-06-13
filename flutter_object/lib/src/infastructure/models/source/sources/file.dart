@@ -6,9 +6,9 @@ class _FileObjectSource extends ObjectSource {
   _FileObjectSource(this.file);
 
   @override
-  FutureOr<Mesh?> get data => _loadFile(file);
+  FutureOr<Object?> get data => _loadFile(file);
 
-  Future<Mesh?> _loadFile(File file) async {
+  Future<Object?> _loadFile(File file) async {
     try {
       final result = await FileReader.loadFile(file);
 

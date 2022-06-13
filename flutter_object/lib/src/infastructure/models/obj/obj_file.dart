@@ -17,7 +17,7 @@ class ObjFile {
     this.faces,
   );
 
-  Mesh toMesh() {
+  Object toObject() {
     final polygons = <Polygon>[];
 
     for (final face in faces) {
@@ -36,6 +36,6 @@ class ObjFile {
       );
     }
 
-    return Mesh(polygons);
+    return Object(polygons);
   }
 }

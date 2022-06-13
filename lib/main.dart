@@ -61,10 +61,10 @@ class _MyHomePageState extends State<MyHomePage>
               width: 400,
               height: 400,
               child: ObjectWidget(
-                source: ObjectSource.fromAssets("assets/plane.obj"),
+                source: ObjectSource.fromAssets("assets/FinalBaseMesh.obj"),
                 controller: _controller
                   ..offset = 12
-                  ..angleZ = pi / 3,
+                  ..angleZ = 0,
               ),
             ),
           ),

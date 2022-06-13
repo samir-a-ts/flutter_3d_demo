@@ -6,13 +6,13 @@ class _AssetObjectSource extends ObjectSource {
   _AssetObjectSource(this.assetPath);
 
   @override
-  FutureOr<Mesh?> get data => _loadAsset(assetPath);
+  FutureOr<Object?> get data => _loadAsset(assetPath);
 
-  Future<Mesh?> _loadAsset(String path) async {
+  Future<Object?> _loadAsset(String path) async {
     try {
       final objFile = await ObjReader.readFromAssets(path);
 
-      return objFile.toMesh();
+      return objFile.toObject();
     } catch (e) {
       return null;
     }
