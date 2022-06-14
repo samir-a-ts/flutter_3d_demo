@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -416,4 +417,16 @@ extension _ConstraintsExt on BoxConstraints {
   bool get hasInfiniteMaxHeight => maxHeight == double.infinity;
 
   bool get hasInfiniteMaxWidth => maxWidth == double.infinity;
+}
+
+extension on Polygon {
+  Path toPath() {
+    final offsets = <Offset>[];
+
+    for (final point in points) {
+      offsets.add(Offset(point.x, point.y));
+    }
+
+    return Path()..addPolygon(offsets, true);
+  }
 }
