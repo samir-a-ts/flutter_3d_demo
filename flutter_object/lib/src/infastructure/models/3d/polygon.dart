@@ -16,16 +16,6 @@ class Polygon extends Iterable<Vector3D> {
 
   Vector3D operator [](int index) => points[index];
 
-  Path toPath() {
-    final offsets = <Offset>[];
-
-    for (final point in points) {
-      offsets.add(Offset(point.x, point.y));
-    }
-
-    return Path()..addPolygon(offsets, true);
-  }
-
   Vector3D calculateNormal() {
     Vector3D line1 = this[1] - this[0], line2 = this[2] - this[0];
 

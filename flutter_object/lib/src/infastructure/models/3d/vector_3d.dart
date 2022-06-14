@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
-
 /// [Vector3D] is a primitive notion that models an exact
 /// location/direction in the three-dimensional space.
 class Vector3D {
@@ -43,8 +41,6 @@ class Vector3D {
 
     return Vector3D.copy(this) / length;
   }
-
-  Offset toOffset() => Offset(x, y);
 
   factory Vector3D.copy(Vector3D point) => Vector3D(point.x, point.y, point.z);
 

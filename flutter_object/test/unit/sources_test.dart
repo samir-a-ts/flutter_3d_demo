@@ -1,6 +1,9 @@
-part of "main_test.dart";
+import 'dart:io';
 
-void _testObjectSources() {
+import 'package:flutter_object/src/infastructure/models/source/object_source.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void sourcesTest() {
   group("Getting Object via ObjectSource model:", () {
     test("From file", () async {
       final file = File("test_resources/cube.obj");

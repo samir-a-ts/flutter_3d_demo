@@ -1,6 +1,9 @@
-part of "main_test.dart";
+import 'dart:io';
 
-void _testFileLoaders() {
+import 'package:flutter_object/src/infastructure/services/file_reader_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void loaderTest() {
   group("Reading ObjectModel via source:", () {
     test("From file", () async {
       final file = File("test_resources/cube.obj");

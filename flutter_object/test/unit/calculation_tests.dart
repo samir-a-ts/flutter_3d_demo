@@ -1,6 +1,9 @@
-part of "main_test.dart";
+import 'package:flutter/rendering.dart';
+import 'package:flutter_object/src/core/math/matrix.dart';
+import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-void _testMath() {
+void calculationTests() {
   group("Math theory test:", () {
     test("Matrix multiplication", () {
       final Matrix4 matrix = Matrix4.zero();
