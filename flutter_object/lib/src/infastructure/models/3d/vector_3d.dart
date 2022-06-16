@@ -44,7 +44,7 @@ class Vector3D {
 
   factory Vector3D.copy(Vector3D point) => Vector3D(point.x, point.y, point.z);
 
-  factory Vector3D.zero() => const Vector3D(0, 0, 0);
+  static const zero = Vector3D(0, 0, 0);
 
   Vector3D copy({
     double? x,
