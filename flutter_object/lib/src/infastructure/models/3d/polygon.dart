@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 
 /// A surface in 3D space
@@ -7,9 +6,12 @@ import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 class Polygon extends Iterable<Vector3D> {
   final List<Vector3D> points;
 
-  final Color color;
+  final List<double> rgbo;
 
-  const Polygon(this.points, [this.color = Colors.grey]);
+  const Polygon(
+    this.points, [
+    this.rgbo = const [158, 158, 158, 1],
+  ]);
 
   @override
   Iterator<Vector3D> get iterator => points.iterator;
@@ -32,11 +34,11 @@ class Polygon extends Iterable<Vector3D> {
 
   Polygon copyWith({
     List<Vector3D>? points,
-    Color? color,
+    List<double>? rgbo,
   }) {
     return Polygon(
       points ?? this.points,
-      color ?? this.color,
+      rgbo ?? this.rgbo,
     );
   }
 }

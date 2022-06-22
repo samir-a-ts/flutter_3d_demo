@@ -33,8 +33,6 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 
   @override
   void initState() {
-    RendererBinding.instance.scheduleWarmUpFrame();
-
     _controller = widget.controller ?? ObjectViewController();
 
     super.initState();
@@ -45,7 +43,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
     return FutureBuilder<ObjectModel?>(
       future: _loadObjectFromSource(widget.source),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           return AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
@@ -98,9 +96,9 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
   }) : super(key: key);
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return RenderObject(
-      object,
+  _RenderObject createRenderObject(BuildContext context) {
+    return _RenderObject(
+      object!,
       angleX,
       angleY,
       angleZ,
@@ -113,9 +111,9 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderObject renderObject) {
+      BuildContext context, covariant _RenderObject renderObject) {
     renderObject
-      ..object = object
+      ..object = object!
       ..angleX = angleX
       ..angleY = angleY
       ..angleZ = angleZ
@@ -126,8 +124,8 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
   }
 }
 
-class RenderObject extends RenderBox {
-  ObjectModel? _object;
+class _RenderObject extends RenderBox {
+  ObjectModel _object;
   double _angleX;
   double _angleY;
   double _angleZ;
@@ -136,7 +134,7 @@ class RenderObject extends RenderBox {
   Vector3D _lightDirection;
   Offset _translation;
 
-  RenderObject(
+  _RenderObject(
     this._object,
     this._angleX,
     this._angleY,
@@ -155,46 +153,46 @@ class RenderObject extends RenderBox {
     markNeedsPaint();
   }
 
-  set object(ObjectModel? object) {
+  set object(ObjectModel object) {
     _object = object;
 
-    markNeedsPaint();
+    _react();
   }
 
   set angleX(double angleX) {
     _angleX = angleX;
 
-    markNeedsPaint();
+    _react();
   }
 
   set angleY(double angleY) {
     _angleY = angleY;
 
-    markNeedsPaint();
+    _react();
   }
 
   set angleZ(double angleZ) {
     _angleZ = angleZ;
 
-    markNeedsPaint();
+    _react();
   }
 
   set offset(double offset) {
     _offset = offset;
 
-    markNeedsPaint();
+    _react();
   }
 
   set vCamera(Vector3D value) {
     _vCamera = value;
 
-    markNeedsPaint();
+    _react();
   }
 
   set lightDirection(Vector3D value) {
     _lightDirection = value;
 
-    markNeedsPaint();
+    _react();
   }
 
   set translation(Offset value) {
@@ -237,20 +235,18 @@ class RenderObject extends RenderBox {
     size = getDryLayout(constraints);
   }
 
+  Future<void> _react() => _projectObject(
+        object: _object,
+        widgetSize: size,
+        angleX: _angleX,
+        angleY: _angleY,
+        angleZ: _angleZ,
+        lightDirection: _lightDirection,
+        offset: _offset,
+        vCamera: _vCamera,
+      );
+
   void _drawObject(PaintingContext context, ObjectModel? object) {
-    if (object == null) return;
-
-    _projectObject(
-      object: object,
-      widgetSize: size,
-      angleX: _angleX,
-      angleY: _angleY,
-      angleZ: _angleZ,
-      lightDirection: _lightDirection,
-      offset: _offset,
-      vCamera: _vCamera,
-    );
-
     if (_projObject != null) {
       final global = localToGlobal(Offset.zero);
 
@@ -270,9 +266,21 @@ class RenderObject extends RenderBox {
       for (final polygon in _projObject!) {
         canvas.drawPath(
           polygon.toPath(),
-          paint..color = polygon.color,
+          paint
+            ..color = Color.fromRGBO(
+              polygon.rgbo[0].toInt(),
+              polygon.rgbo[1].toInt(),
+              polygon.rgbo[2].toInt(),
+              polygon.rgbo[3],
+            ),
         );
       }
+    } else {
+      _react().then(
+        (_) => _projectionWorker.results.listen((event) {
+          _projectedObject = event;
+        }),
+      );
     }
   }
 
@@ -285,20 +293,20 @@ class RenderObject extends RenderBox {
     double angleX = 0,
     double angleZ = 0,
     double angleY = pi / 4,
-  }) async {
-    _projectedObject = await _projectionWorker.project(
-      object,
-      ProjectionData(
-        widgetSize,
-        angleX,
-        angleY,
-        angleZ,
-        offset,
-        vCamera,
-        lightDirection,
-      ),
-    );
-  }
+  }) =>
+      _projectionWorker.project(
+        object,
+        ProjectionData(
+          widgetSize.width,
+          widgetSize.height,
+          angleX,
+          angleY,
+          angleZ,
+          offset,
+          vCamera,
+          lightDirection,
+        ),
+      );
 
   @override
   void dispose() {

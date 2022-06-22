@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 
 class ProjectionData {
-  final Size widgetSize;
+  final double width;
+  final double height;
   final double angleX;
   final double angleZ;
   final double angleY;
@@ -11,7 +11,8 @@ class ProjectionData {
   final Vector3D lightDirection;
 
   ProjectionData(
-    this.widgetSize,
+    this.width,
+    this.height,
     this.angleX,
     this.angleY,
     this.angleZ,

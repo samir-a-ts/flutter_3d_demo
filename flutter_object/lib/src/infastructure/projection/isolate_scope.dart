@@ -15,7 +15,8 @@ void isolateScope(SendPort port) async {
 
     final result = await projectObject(
       object: model,
-      widgetSize: data.widgetSize,
+      width: data.width,
+      height: data.height,
       angleX: data.angleX,
       angleY: data.angleY,
       angleZ: data.angleZ,

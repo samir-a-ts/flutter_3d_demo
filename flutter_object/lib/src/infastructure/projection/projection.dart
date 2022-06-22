@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter_object/src/core/math/matrix.dart';
 import 'package:flutter_object/src/infastructure/models/3d/object.dart';
 import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
@@ -8,7 +8,8 @@ import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 
 Future<ObjectModel> projectObject({
   required ObjectModel object,
-  required Size widgetSize,
+  required double width,
+  required double height,
   Vector3D vCamera = Vector3D.zero,
   Vector3D lightDirection = const Vector3D(0, 0, -1),
   double offset = 3.0,
@@ -95,8 +96,7 @@ Future<ObjectModel> projectObject({
 
   final _fFovRad = 1.0 / tan(_fFov * .5 / 180 * pi);
 
-  projectionMatrix.setEntry(
-      0, 0, (widgetSize.height / widgetSize.width) * _fFovRad);
+  projectionMatrix.setEntry(0, 0, (height / width) * _fFovRad);
   projectionMatrix.setEntry(1, 1, _fFovRad);
   projectionMatrix.setEntry(2, 2, focusFar / (focusFar - focusNear));
   projectionMatrix.setEntry(
@@ -109,8 +109,8 @@ Future<ObjectModel> projectObject({
 
   final Matrix4 sizingMatrix = Matrix4.zero();
 
-  sizingMatrix.setEntry(0, 0, (widgetSize.width * .5));
-  sizingMatrix.setEntry(1, 1, (widgetSize.height * .5));
+  sizingMatrix.setEntry(0, 0, (width * .5));
+  sizingMatrix.setEntry(1, 1, (height * .5));
   sizingMatrix.setEntry(2, 2, 1);
   sizingMatrix.setEntry(3, 3, 1);
 
@@ -144,12 +144,12 @@ Future<ObjectModel> projectObject({
       projectedPolygons.add(
         Polygon(
           projectedPoints,
-          Color.fromRGBO(
-            (rotatedPolygon.color.red * (dotProduct)).floor(),
-            (rotatedPolygon.color.green * (dotProduct)).floor(),
-            (rotatedPolygon.color.blue * (dotProduct)).floor(),
-            rotatedPolygon.color.opacity,
-          ),
+          [
+            (rotatedPolygon.rgbo[0] * (dotProduct)),
+            (rotatedPolygon.rgbo[1] * (dotProduct)),
+            (rotatedPolygon.rgbo[2] * (dotProduct)),
+            rotatedPolygon.rgbo[3],
+          ],
         ),
       );
     }

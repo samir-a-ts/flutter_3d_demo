@@ -22,7 +22,7 @@ class ProjectionWorker {
 
   SendPort? _isolatePort;
 
-  Future<ObjectModel> project(
+  Future<void> project(
     ObjectModel model,
     ProjectionData projectionData,
   ) async {
@@ -35,21 +35,9 @@ class ProjectionWorker {
     );
 
     _workerResultStreamController ??= StreamController.broadcast()
-      ..addStream(
-        _workerPort!.asBroadcastStream(),
-      );
+      ..addStream(_workerPort!);
 
     _isolatePort ??= await _workerResultStreamController!.stream.first;
-
-    final Completer<ObjectModel> completer = Completer();
-
-    if (!_workerResultStreamController!.hasListener) {
-      _workerResultStreamController?.stream.listen(
-        (result) {
-          if (result is ObjectModel) completer.complete(result);
-        },
-      );
-    }
 
     _isolatePort!.send(
       Tuple(
@@ -57,9 +45,11 @@ class ProjectionWorker {
         projectionData,
       ),
     );
-
-    return completer.future;
   }
+
+  Stream<ObjectModel> get results => _workerResultStreamController!.stream
+      .where((event) => event is ObjectModel)
+      .cast<ObjectModel>();
 
   void dispose() {
     _isolate?.kill();
