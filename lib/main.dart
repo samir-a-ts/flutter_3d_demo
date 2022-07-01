@@ -32,6 +32,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _controller = ObjectViewController();
 
+  bool _show = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,12 +44,12 @@ class _MyHomePageState extends State<MyHomePage> {
             child: SizedBox(
               width: 400,
               height: 400,
-              child: ObjectWidget(
-                source: ObjectSource.fromAssets("assets/man.obj"),
-                controller: _controller
-                  ..offset = 10
-                  ..translation = const Offset(0, -100),
-              ),
+              child: _show
+                  ? ObjectWidget(
+                      source: ObjectSource.fromAssets("assets/cube.obj"),
+                      controller: _controller..offset = 4,
+                    )
+                  : const SizedBox(),
             ),
           ),
           Align(
@@ -56,22 +58,37 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.only(
                 bottom: 20,
               ),
-              child: SizedBox(
-                width: 400,
-                height: 20,
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, snapshot) {
-                    return Slider(
-                      value: _controller.angleY + 2 * pi,
-                      min: 0,
-                      max: 4 * pi,
-                      onChanged: (value) {
-                        _controller.angleY = value - 2 * pi;
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _show = !_show;
+                      });
+                    },
+                    child: const Text("On/off"),
+                  ),
+                  SizedBox(
+                    width: 400,
+                    height: 20,
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, snapshot) {
+                        return Slider(
+                          value: _controller.angleY + 2 * pi,
+                          min: 0,
+                          max: 4 * pi,
+                          onChanged: (value) {
+                            _controller.angleY = value - 2 * pi;
+                            _controller.angleX = value - 2 * pi;
+                            _controller.angleZ = value - 2 * pi;
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

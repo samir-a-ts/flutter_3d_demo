@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,10 +29,17 @@ class ObjectWidget extends StatefulWidget {
 
 class _ObjectWidgetState extends State<ObjectWidget> {
   late ObjectViewController _controller;
+  late ProjectionWorker _worker;
 
   @override
   void initState() {
+    RendererBinding.instance.scheduleWarmUpFrame();
+
     _controller = widget.controller ?? ObjectViewController();
+
+    _worker = ProjectionWorker();
+
+    _worker.warmUp();
 
     super.initState();
   }
@@ -56,6 +62,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
                 vCamera: _controller.vCamera,
                 lightDirection: _controller.lightDirection,
                 translation: _controller.translation,
+                worker: _worker,
               );
             },
           );
@@ -82,8 +89,10 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
   final Vector3D vCamera;
   final Vector3D lightDirection;
   final Offset translation;
+  final ProjectionWorker worker;
 
   const ObjectRenderWidget({
+    required this.worker,
     required this.translation,
     required this.object,
     required this.vCamera,
@@ -106,6 +115,7 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
       vCamera,
       lightDirection,
       translation,
+      worker,
     );
   }
 
@@ -133,6 +143,7 @@ class _RenderObject extends RenderBox {
   Vector3D _vCamera;
   Vector3D _lightDirection;
   Offset _translation;
+  final ProjectionWorker _worker;
 
   _RenderObject(
     this._object,
@@ -143,6 +154,7 @@ class _RenderObject extends RenderBox {
     this._vCamera,
     this._lightDirection,
     this._translation,
+    this._worker,
   );
 
   ObjectModel? _projObject;
@@ -150,49 +162,51 @@ class _RenderObject extends RenderBox {
   set _projectedObject(ObjectModel object) {
     _projObject = object;
 
-    markNeedsPaint();
+    if (!(debugDisposed ?? false)) {
+      markNeedsPaint();
+    }
   }
 
   set object(ObjectModel object) {
     _object = object;
 
-    _react();
+    _project();
   }
 
   set angleX(double angleX) {
     _angleX = angleX;
 
-    _react();
+    _project();
   }
 
   set angleY(double angleY) {
     _angleY = angleY;
 
-    _react();
+    _project();
   }
 
   set angleZ(double angleZ) {
     _angleZ = angleZ;
 
-    _react();
+    _project();
   }
 
   set offset(double offset) {
     _offset = offset;
 
-    _react();
+    _project();
   }
 
   set vCamera(Vector3D value) {
     _vCamera = value;
 
-    _react();
+    _project();
   }
 
   set lightDirection(Vector3D value) {
     _lightDirection = value;
 
-    _react();
+    _project();
   }
 
   set translation(Offset value) {
@@ -201,50 +215,12 @@ class _RenderObject extends RenderBox {
     markNeedsPaint();
   }
 
-  final _projectionWorker = ProjectionWorker();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     layer ??= ContainerLayer();
 
     _drawObject(context, _object);
   }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    /// Widget cannot build itself on infinite plane
-    /// and with dimension null.
-    if (constraints.hasInfiniteMaxHeight && constraints.hasInfiniteMaxWidth) {
-      throw FlutterError(
-          "ObjectWidget cannot be drawn without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
-    }
-
-    if (constraints.hasInfiniteMaxWidth) {
-      return Size.square(constraints.maxHeight);
-    }
-
-    if (constraints.hasInfiniteMaxHeight) {
-      return Size.square(constraints.maxWidth);
-    }
-
-    return constraints.biggest;
-  }
-
-  @override
-  void performLayout() {
-    size = getDryLayout(constraints);
-  }
-
-  Future<void> _react() => _projectObject(
-        object: _object,
-        widgetSize: size,
-        angleX: _angleX,
-        angleY: _angleY,
-        angleZ: _angleZ,
-        lightDirection: _lightDirection,
-        offset: _offset,
-        vCamera: _vCamera,
-      );
 
   void _drawObject(PaintingContext context, ObjectModel? object) {
     if (_projObject != null) {
@@ -275,44 +251,61 @@ class _RenderObject extends RenderBox {
             ),
         );
       }
-    } else {
-      _react().then(
-        (_) => _projectionWorker.results.listen((event) {
-          _projectedObject = event;
-        }),
-      );
+
+      return;
     }
+
+    _worker.results.listen((event) {
+      _projectedObject = event;
+    });
+
+    _project();
   }
 
-  Future<void> _projectObject({
-    required ObjectModel object,
-    required Size widgetSize,
-    Vector3D vCamera = Vector3D.zero,
-    Vector3D lightDirection = const Vector3D(0, 0, -1),
-    double offset = 3.0,
-    double angleX = 0,
-    double angleZ = 0,
-    double angleY = pi / 4,
-  }) =>
-      _projectionWorker.project(
-        object,
+  void _project() => _worker.project(
+        _object,
         ProjectionData(
-          widgetSize.width,
-          widgetSize.height,
-          angleX,
-          angleY,
-          angleZ,
-          offset,
-          vCamera,
-          lightDirection,
+          size.width,
+          size.height,
+          _angleX,
+          _angleY,
+          _angleZ,
+          _offset,
+          _vCamera,
+          _lightDirection,
         ),
       );
 
   @override
   void dispose() {
-    _projectionWorker.dispose();
+    _worker.dispose();
 
     super.dispose();
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    /// Widget cannot build itself on infinite plane
+    /// and with dimension null.
+    if (constraints.hasInfiniteMaxHeight && constraints.hasInfiniteMaxWidth) {
+      throw FlutterError(
+          "ObjectWidget cannot be drawn without dimension in infinite plane.\nTry adding dimension parameter, or removing this widget.");
+    }
+
+    if (constraints.hasInfiniteMaxWidth) {
+      return Size.square(constraints.maxHeight);
+    }
+
+    if (constraints.hasInfiniteMaxHeight) {
+      return Size.square(constraints.maxWidth);
+    }
+
+    return constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    size = getDryLayout(constraints);
   }
 }
 
