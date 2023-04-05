@@ -6,6 +6,7 @@ import 'package:flutter_object/src/infastructure/models/3d/object.dart';
 import 'package:flutter_object/src/infastructure/models/3d/polygon.dart';
 import 'package:flutter_object/src/infastructure/models/3d/vector_3d.dart';
 import 'package:flutter_object/src/infastructure/models/source/object_source.dart';
+import 'package:flutter_object/src/infastructure/projection/projection.dart';
 import 'package:flutter_object/src/infastructure/projection/projection_data.dart';
 import 'package:flutter_object/src/infastructure/projection/worker.dart';
 import 'package:flutter_object/src/presentation/core/empty.dart';
@@ -29,7 +30,7 @@ class ObjectWidget extends StatefulWidget {
 
 class _ObjectWidgetState extends State<ObjectWidget> {
   late ObjectViewController _controller;
-  late ProjectionWorker _worker;
+  // late ProjectionWorker _worker;
 
   @override
   void initState() {
@@ -37,9 +38,9 @@ class _ObjectWidgetState extends State<ObjectWidget> {
 
     _controller = widget.controller ?? ObjectViewController();
 
-    _worker = ProjectionWorker();
+    // _worker = ProjectionWorker();
 
-    _worker.warmUp();
+    // _worker.warmUp();
 
     super.initState();
   }
@@ -62,7 +63,7 @@ class _ObjectWidgetState extends State<ObjectWidget> {
                 vCamera: _controller.vCamera,
                 lightDirection: _controller.lightDirection,
                 translation: _controller.translation,
-                worker: _worker,
+                // worker: _worker,
               );
             },
           );
@@ -89,10 +90,10 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
   final Vector3D vCamera;
   final Vector3D lightDirection;
   final Offset translation;
-  final ProjectionWorker worker;
+  // final ProjectionWorker worker;
 
   const ObjectRenderWidget({
-    required this.worker,
+    // required this.worker,
     required this.translation,
     required this.object,
     required this.vCamera,
@@ -115,13 +116,12 @@ class ObjectRenderWidget extends LeafRenderObjectWidget {
       vCamera,
       lightDirection,
       translation,
-      worker,
+      // worker,
     );
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, covariant _RenderObject renderObject) {
+  void updateRenderObject(BuildContext context, covariant _RenderObject renderObject) {
     renderObject
       ..object = object!
       ..angleX = angleX
@@ -143,7 +143,7 @@ class _RenderObject extends RenderBox {
   Vector3D _vCamera;
   Vector3D _lightDirection;
   Offset _translation;
-  final ProjectionWorker _worker;
+  // final ProjectionWorker _worker;
 
   _RenderObject(
     this._object,
@@ -154,8 +154,10 @@ class _RenderObject extends RenderBox {
     this._vCamera,
     this._lightDirection,
     this._translation,
-    this._worker,
-  );
+    // this._worker,
+  ) {
+    _project();
+  }
 
   ObjectModel? _projObject;
 
@@ -255,33 +257,47 @@ class _RenderObject extends RenderBox {
       return;
     }
 
-    _worker.results.listen((event) {
-      _projectedObject = event;
-    });
+    // _worker.results.listen((event) {
+    //   _projectedObject = event;
+    // });
 
     _project();
   }
 
-  void _project() => _worker.project(
-        _object,
-        ProjectionData(
-          size.width,
-          size.height,
-          _angleX,
-          _angleY,
-          _angleZ,
-          _offset,
-          _vCamera,
-          _lightDirection,
-        ),
-      );
-
-  @override
-  void dispose() {
-    _worker.dispose();
-
-    super.dispose();
+  Future<void> _project() async {
+    _projObject = await projectObject(
+      object: _object,
+      width: size.width,
+      height: size.height,
+      angleX: _angleX,
+      angleY: _angleY,
+      angleZ: _angleZ,
+      lightDirection: _lightDirection,
+      offset: _offset,
+      vCamera: _vCamera,
+    );
   }
+
+  // void _project() => _worker.project(
+  //       _object,
+  //       ProjectionData(
+  //         size.width,
+  //         size.height,
+  //         _angleX,
+  //         _angleY,
+  //         _angleZ,
+  //         _offset,
+  //         _vCamera,
+  //         _lightDirection,
+  //       ),
+  //     );
+
+  // @override
+  // void dispose() {
+  //   _worker.dispose();
+
+  //   super.dispose();
+  // }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {

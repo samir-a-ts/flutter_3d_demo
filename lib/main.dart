@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: _show
                   ? ObjectWidget(
                       source: ObjectSource.fromAssets("assets/cube.obj"),
-                      controller: _controller..offset = 4,
+                      controller: _controller..offset = 3,
                     )
                   : const SizedBox(),
             ),
