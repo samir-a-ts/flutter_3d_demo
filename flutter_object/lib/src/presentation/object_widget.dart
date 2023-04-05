@@ -155,9 +155,7 @@ class _RenderObject extends RenderBox {
     this._lightDirection,
     this._translation,
     // this._worker,
-  ) {
-    _project();
-  }
+  );
 
   ObjectModel? _projObject;
 
@@ -265,7 +263,7 @@ class _RenderObject extends RenderBox {
   }
 
   Future<void> _project() async {
-    _projObject = await projectObject(
+    _projectedObject = await projectObject(
       object: _object,
       width: size.width,
       height: size.height,
